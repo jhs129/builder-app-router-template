@@ -1,0 +1,56 @@
+/* Transparent Light Theme - CSS Custom Properties Pattern */
+[data-theme="transparent-light"] {
+  /* Theme-aware color mappings */
+  --theme-bg: rgba(255, 255, 255, 0.3);
+  --theme-bg-alt: var(--primary-accent);
+  --theme-text: var(--primary-dark);
+  --theme-text-alt: var(--accent-purple);
+  --theme-heading: var(--primary-dark);
+  --theme-heading-alt: var(--primary-accent); /* for h5, h6 */
+  --theme-text-muted: var(--primary-dark);
+  --theme-link: var(--primary-accent);
+  --theme-link-hover: var(--accent-purple);
+  --theme-btn-text: var(--theme-text);
+  
+}
+
+/* Button colors to match theme accent (--theme-heading-alt: primary-accent) */
+/* [data-theme="transparent-light"] .btn-primary {
+  @apply bg-primary-accent text-primary-light;
+}
+
+[data-theme="transparent-light"] .btn-primary:hover {
+  @apply bg-accent-purple text-primary-light;
+}
+
+[data-theme="transparent-light"] .btn-outlined {
+  @apply text-primary-accent border-primary-accent;
+}
+
+[data-theme="transparent-light"] .btn-outlined:hover {
+  @apply bg-primary-accent text-primary-light;
+} */
+
+/* Underline colors to match theme accent */
+[data-theme="transparent-light"] u.underline-accent {
+  border-bottom-color: var(--primary-accent) !important;
+}
+
+/* Legacy class support - will be phased out */
+/* .theme.theme-transparent-light {
+  @apply bg-transparent text-primary-dark;
+  background-color: rgba(255, 255, 255, 0.3);
+}
+
+.theme.theme-transparent-light h6 {
+  @apply text-primary-accent;
+}
+
+.theme.theme-transparent-light p {
+  @apply text-primary-dark;
+}
+
+.theme.theme-transparent-light a:not(.theme-btn) {
+  @apply text-primary-accent hover:text-accent-purple;
+} */
+

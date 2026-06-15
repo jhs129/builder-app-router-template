@@ -1,0 +1,75 @@
+/* Dark Theme - CSS Custom Properties Pattern */
+[data-theme="dark"] {
+  /* Theme-aware color mappings */
+  --theme-bg: var(--primary-dark);
+  --theme-bg-alt: var(--primary-light);
+  --theme-text: var(--primary-light);
+  --theme-text-alt: var(--accent-green);
+  --theme-heading: var(--primary-light);
+  --theme-heading-alt: var(--accent-cyan); /* for h5, h6 */
+  --theme-text-muted: rgb(229, 231, 235); /* gray-200 equivalent */
+  --theme-link: var(--accent-cyan);
+  --theme-link-hover: var(--accent-teal);
+  --theme-btn-text: var(--theme-text);
+  
+}
+
+/* Button colors to match theme accent (--theme-heading-alt: accent-cyan) */
+/*
+[data-theme="dark"] .btn-primary {
+  background-color: var(--accent-cyan);
+  color: var(--primary-dark);
+}
+
+[data-theme="dark"] .btn-primary:hover {
+  background-color: var(--accent-teal);
+  color: var(--primary-dark);
+}
+
+[data-theme="dark"] .btn-outlined {
+  color: var(--accent-cyan);
+  border-color: var(--accent-cyan);
+}
+
+[data-theme="dark"] .btn-outlined:hover {
+  background-color: var(--accent-cyan);
+  color: var(--primary-dark);
+}
+*/
+
+/* Underline colors to match theme accent */
+[data-theme="dark"] u.underline-accent {
+  border-bottom-color: var(--accent-cyan) !important;
+}
+
+/* Legacy class support - will be phased out */
+.theme.theme-dark {
+  background-color: var(--primary-dark);
+  color: var(--primary-light);
+}
+
+.theme.theme-dark h2 {
+  color: var(--primary-light);
+}
+.theme.theme-dark h3 {
+  color: var(--primary-light);
+}
+.theme.theme-dark h4 {
+  color: var(--primary-light);
+}
+.theme.theme-dark h5,h6 {
+  color: var(--accent-cyan);
+}
+
+.theme.theme-dark p {
+  color: rgb(229, 231, 235);
+}
+
+.theme.theme-dark a:not(.theme-btn) {
+  color: var(--accent-cyan);
+}
+
+.theme.theme-dark a:not(.theme-btn):hover {
+  color: var(--accent-teal);
+}
+

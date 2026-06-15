@@ -1,0 +1,23 @@
+/* Light Theme - CSS Custom Properties Pattern */
+[data-theme="light"],
+[data-theme] [data-theme="light"] {
+  /* Theme-aware color mappings */
+  --theme-bg: var(--primary-light);
+  --theme-bg-alt: var(--primary-dark);
+  --theme-text: var(--primary-dark);
+  --theme-text-alt: var(--accent-purple);
+  --theme-heading: var(--primary-dark);
+  --theme-heading-alt: var(--accent-purple); /* for h5, h6 */
+  --theme-text-muted: var(--secondary-dark);
+  --theme-link: var(--accent-purple);
+  --theme-link-hover: var(--accent-purple);
+  --theme-btn-text: var(--primary-light);
+  
+}
+
+/* Underline colors to match theme accent */
+[data-theme="light"] u.underline-accent {
+  border-bottom-color: var(--accent-cyan) !important;
+}
+
+

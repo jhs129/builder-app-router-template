@@ -1,0 +1,44 @@
+/* Transparent Dark Theme - CSS Custom Properties Pattern */
+[data-theme="transparent-dark"] {
+  /* Theme-aware color mappings */
+  --theme-bg: rgba(255, 255, 255, 0.3);
+  --theme-bg-alt: var(--primary-dark);
+  --theme-text: var(--primary-dark);
+  --theme-text-alt: var(--primary-light);
+  --theme-heading: var(--primary-dark);
+  --theme-heading-alt: var(--accent-magenta); /* for h5, h6 */
+  --theme-text-muted: var(--primary-dark);
+  --theme-link: var(--accent-cyan);
+  --theme-link-hover: var(--accent-teal);
+  --theme-btn-text: var(--primary-light);
+  
+}
+
+/* Legacy class support - will be phased out */
+/* .theme.theme-transparent-dark {
+  @apply text-primary-light;
+  background-color: rgba(255, 255, 255, 0.3);
+}
+
+.theme.theme-transparent-dark h1,h2,h3,h4,h6 {
+  @apply text-primary-dark;
+}
+
+.theme.theme-transparent-dark p {
+  @apply text-primary-dark;
+}
+
+.theme.theme-transparent-dark blockquote {
+  @apply text-primary-dark;
+}
+
+.theme.theme-transparent-dark a:not(.theme-btn) {
+  @apply text-accent-cyan hover:text-accent-teal;
+} */
+
+/* Underline colors to match theme accent */
+[data-theme="transparent-dark"] u.underline-accent {
+  border-bottom-color: var(--accent-magenta) !important;
+}
+
+

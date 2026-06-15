@@ -1,0 +1,67 @@
+{
+  "screens": {
+    "sm": { "max": "640px" },
+    "md": { "min": "640px", "max": "991px" },
+    "lg": { "min": "991px" }
+  },
+  "colors": {
+    "primary-light": "var(--primary-light, #ffffff)",
+    "secondary-light": "var(--secondary-light, #f5f5f5)",
+    "primary-dark": "var(--primary-dark, #1d0f34)",
+    "secondary-dark": "var(--secondary-dark, #647589)",
+    "primary-accent": "var(--accent-purple, #6610f2)",
+    "secondary-accent": "var(--primary-cyan, #5ce1e6)",
+    "accent-purple": "var(--accent-purple, #6610f2)",
+    "accent-green": "var(--accent-green, #20c997)",
+    "accent-magenta": "var(--accent-magenta, #b31d9d)",
+    "accent-cyan": "var(--accent-cyan, #5ce1e6)",
+    "accent-teal": "var(--accent-teal, #0dcaf0)",
+    "accent-light-purple": "var(--accent-light-purple, #8c52ff)",
+    "theme-bg": "var(--theme-bg, var(--primary-light))",
+    "theme-bg-alt": "var(--theme-bg-alt, var(--primary-dark))",
+    "theme-text": "var(--theme-text, var(--primary-dark))",
+    "theme-text-alt": "var(--theme-text-alt, var(--primary-light))",
+    "theme-heading": "var(--theme-heading, var(--primary-dark))",
+    "theme-heading-alt": "var(--theme-heading-alt, var(--accent-purple))",
+    "theme-text-muted": "var(--theme-text-muted, var(--secondary-dark))",
+    "theme-link": "var(--theme-link, var(--primary-accent))",
+    "theme-link-hover": "var(--theme-link-hover, var(--accent-purple))",
+    "theme-underline": "var(--theme-underline, var(--accent-purple))",
+    "theme-btn-bg": "var(--theme-btn-bg, var(--primary-accent))",
+    "theme-btn-text": "var(--theme-btn-text, var(--primary-light))",
+    "theme-btn-hover-bg": "var(--theme-btn-hover-bg, var(--secondary-dark))",
+    "theme-btn-hover-text": "var(--theme-btn-hover-text, var(--primary-dark))",
+    "theme-btn-outlined-text": "var(--theme-btn-outlined-text, var(--primary-accent))",
+    "theme-btn-outlined-border": "var(--theme-btn-outlined-border, var(--primary-accent))",
+    "theme-btn-outlined-hover-bg": "var(--theme-btn-outlined-hover-bg, var(--primary-accent))",
+    "theme-btn-outlined-hover-text": "var(--theme-btn-outlined-hover-text, var(--primary-light))",
+    "theme-focus": "var(--theme-focus, var(--primary-accent))"
+  },
+  "fontFamily": {
+    "primary": ["var(--font-primary)"],
+    "secondary": ["var(--font-secondary)"],
+    "sans": ["var(--font-primary)"],
+    "accent": ["var(--font-accent)"]
+  },
+  "fontSize": {
+    "hero": ["40px", "52px"]
+  },
+  "spacing": {
+    "section": "36px",
+    "card": "20px",
+    "text": "16px",
+    "container": "50px"
+  },
+  "rotate": {
+    "y-180": "180deg"
+  },
+  "transformStyle": {
+    "preserve-3d": "preserve-3d"
+  },
+  "perspective": {
+    "1000": "1000px"
+  },
+  "backfaceVisibility": {
+    "hidden": "hidden"
+  }
+}

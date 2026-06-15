@@ -1,0 +1,33 @@
+/* Gradient Theme - CSS Custom Properties Pattern */
+[data-theme="gradient"] {
+  /* Theme-aware color mappings */
+  --theme-bg: var(--accent-purple); /* Fallback for components that need solid color */
+  --theme-bg-alt: var(--primary-light);
+  --theme-text: var(--primary-light);
+  --theme-text-alt: var(--accent-light-purple);
+  --theme-heading: var(--primary-light);
+  --theme-heading-alt: var(--accent-cyan); /* for h5, h6 */
+  --theme-text-muted: var(--primary-light);
+  --theme-link: var(--secondary-dark);
+  --theme-link-hover: var(--accent-teal);
+  --theme-btn-text: var(--secondary-dark);
+  
+}
+
+
+/* Apply gradient background to elements that should have it */
+[data-theme="gradient"] {
+  background: linear-gradient(to right, var(--accent-purple), var(--accent-blue), var(--accent-cyan));
+}
+
+/* Override for specific components that need solid backgrounds */
+[data-theme="gradient"] .bg-theme-bg-alt {
+  background: var(--theme-bg-alt) !important;
+}
+
+
+/* Underline colors to match theme accent */
+[data-theme="gradient"] u.underline-accent {
+  border-bottom-color: var(--accent-teal) !important;
+}
+

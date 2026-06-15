@@ -1,0 +1,33 @@
+{
+  "name": "@repo/components",
+  "version": "0.1.0",
+  "private": true,
+  "main": "./index.ts",
+  "types": "./index.ts",
+  "scripts": {
+    "build": "tsc",
+    "dev": "tsc --watch",
+    "lint": "echo 'No linting configured for components package'"
+  },
+  "dependencies": {
+    "@builder.io/sdk-react": "^5.2.3",
+    "@repo/types": "workspace:*",
+    "@types/react-slick": "^0.23.13",
+    "next": "16.2.9",
+    "react": "^19.2.0",
+    "react-dom": "^19.2.0",
+    "react-slick": "^0.30.3",
+    "slick-carousel": "^1.8.1"
+  },
+  "devDependencies": {
+    "@types/node": "^20",
+    "@types/react": "^19",
+    "@types/react-dom": "^19",
+    "typescript": "^5"
+  },
+  "peerDependencies": {
+    "next": "^16.0.0",
+    "react": "^19.0.0",
+    "react-dom": "^19.0.0"
+  }
+}

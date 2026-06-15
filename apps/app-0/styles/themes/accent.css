@@ -1,0 +1,76 @@
+/* Accent Theme - CSS Custom Properties Pattern */
+[data-theme="accent"] {
+  /* Theme-aware color mappings */
+  --theme-bg: var(--primary-accent);
+  --theme-bg-alt: var(--primary-light);
+  --theme-text: var(--primary-light);
+  --theme-text-alt: var(--accent-green);
+  --theme-heading: var(--primary-light);
+  --theme-heading-alt: var(--accent-cyan); /* for h5, h6 */
+  --theme-text-muted: var(--primary-light);
+  --theme-link: var(--accent-cyan);
+  --theme-link-hover: var(--accent-teal);
+  --theme-btn-text: var(--theme-text);
+  
+}
+
+/* Button colors to match theme accent (--theme-heading-alt: accent-cyan) */
+/* [data-theme="accent"] .btn-primary {
+  @apply bg-accent-cyan text-primary-dark;
+}
+
+[data-theme="accent"] .btn-primary:hover {
+  @apply bg-accent-teal text-primary-dark;
+}
+
+[data-theme="accent"] .btn-outlined {
+  @apply text-accent-cyan border-accent-cyan;
+}
+
+[data-theme="accent"] .btn-outlined:hover {
+  @apply bg-accent-cyan text-primary-dark;
+} */
+
+/* Underline colors to match theme accent */
+[data-theme="accent"] u.underline-accent {
+  border-bottom-color: var(--accent-cyan) !important;
+}
+
+/* Legacy class support - will be phased out */
+.theme.theme-accent {
+  background-color: var(--accent-purple);
+  color: var(--primary-light);
+}
+
+.theme.theme-accent h2 {
+  color: var(--primary-light);
+}
+
+.theme.theme-accent h3 {
+  color: var(--primary-light);
+}
+
+.theme.theme-accent h4 {
+  color: var(--primary-light);
+}
+
+.theme.theme-accent h5 {
+  color: var(--accent-cyan);
+}
+
+.theme.theme-accent h6 {
+  color: var(--primary-light);
+}
+
+.theme.theme-accent p {
+  color: var(--primary-light);
+}
+
+.theme.theme-accent a:not(.theme-btn) {
+  color: var(--accent-cyan);
+}
+
+.theme.theme-accent a:not(.theme-btn):hover {
+  color: var(--accent-teal);
+}
+

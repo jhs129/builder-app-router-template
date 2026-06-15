@@ -1,0 +1,516 @@
+/* Import theme styles. CSS requires @import to precede all other rules
+   (Turbopack's parser enforces this; webpack tolerated imports lower down). */
+@import "./themes/light.css";
+@import "./themes/dark.css";
+@import "./themes/accent.css";
+@import "./themes/gradient.css";
+@import "./themes/transparent-light.css";
+@import "./themes/transparent-dark.css";
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  :root {
+    /* Font Family */
+    --font-primary:
+      "Poppins", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto,
+      "Helvetica Neue", Arial, sans-serif;
+
+    /* Brand  Color Variables */
+    --primary-dark: #1d0f34;
+    --primary-light: #ffffff;
+    --secondary-light: #f5f5f5;
+    --secondary-dark: #647589;
+    --accent-purple: #6610f2;
+    --accent-green: #20c997;
+    --accent-magenta: #b31d9d;
+    --accent-cyan: #5ce1e6;
+    --accent-teal: #0dcaf0;
+    --accent-light-purple: #8c52ff;
+    --primary-cyan: #5ce1e6;
+    --primary-accent: #6610f2; /* Same as --accent-purple */
+
+    /* Legacy Theme Colors */
+    --theme-light-heading: var(--accent-purple);
+    --theme-dark-heading: var(--primary-light);
+    --theme-accent-heading: var(--primary-light);
+
+    /* Default Theme-aware Properties (Light Theme as default) */
+    --theme-bg: var(--primary-light);
+    --theme-text: var(--primary-dark);
+    --theme-heading: var(--primary-dark);
+    --theme-heading-alt: var(--accent-purple);
+    --theme-text-muted: var(--secondary-dark);
+    --theme-link: var(--accent-purple);
+    --theme-link-hover: var(--accent-purple);
+
+    /* Default Focus Colors - Consistent with heading-alt */
+    --theme-focus: var(--theme-heading-alt);
+
+    /* Default Underline Colors - Consistent with heading-alt */
+    --theme-underline: var(--theme-heading-alt);
+  }
+
+  /* Base Typography */
+  body {
+    background-color: var(--theme-bg);
+    font-family: var(--font-primary);
+    font-size: 1rem;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+  }
+
+  h1,
+  h2,
+  h3,
+  h4,
+  h5,
+  h6 {
+    @apply mt-4 font-semibold leading-tight m-0;
+  }
+
+  h1 {
+    @apply text-5xl font-sans mb-6 leading-tight;
+  }
+
+  h2 {
+    @apply text-4xl font-sans mb-6 leading-tight;
+  }
+
+  h3 {
+    @apply text-xl;
+  }
+
+  h4 {
+    @apply text-lg font-medium mb-3;
+  }
+
+  h5 {
+    font-size: 1.5rem;
+    color: var(--theme-heading-alt);
+    font-family: var(--font-accent);
+    display: inline-block;
+    transform: rotate(-3deg);
+    transform-origin: center;
+  }
+
+  h6 {
+    color: var(--theme-heading-alt);
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    font-size: 0.875rem;
+    font-family: var(--font-primary);
+    margin-bottom: 1rem;
+  }
+
+  p {
+    @apply my-4 leading-[25.2px] font-sans;
+  }
+
+  ul {
+    @apply my-4 pl-8;
+  }
+
+  ol {
+    @apply my-4 pl-6;
+  }
+
+  li {
+    @apply mb-2 list-outside;
+  }
+
+  ul li {
+    @apply list-disc;
+  }
+
+  ol li {
+    @apply list-decimal;
+  }
+
+  a {
+    color: var(--theme-link);
+    transition-property: color;
+    transition-duration: 200ms;
+    transition-timing-function: ease-in-out;
+    text-decoration: none;
+  }
+
+  /* Default Image Styles */
+  img {
+    @apply max-w-full h-auto object-cover;
+  }
+
+  /* Theme-aware underline system using CSS variables */
+  u.underline-accent {
+    text-decoration: none !important;
+    border-bottom: 2px solid var(--theme-underline);
+    border-radius: 1px;
+  }
+
+  /* Legacy color variants - for backwards compatibility */
+  u.underline-green {
+    text-decoration: none !important;
+    border-bottom: 2px solid var(--accent-green);
+    border-radius: 1px;
+  }
+
+  u.underline-magenta {
+    text-decoration: none !important;
+    border-bottom: 2px solid var(--accent-magenta);
+    border-radius: 1px;
+  }
+
+  u.underline-cyan {
+    text-decoration: none !important;
+    border-bottom: 2px solid var(--accent-cyan);
+    border-radius: 1px;
+  }
+}
+
+@layer components {
+  /* Base Theme Styles */
+  .theme {
+    @apply transition-colors duration-200;
+  }
+
+  /* Button Base Styles */
+  .btn {
+    @apply inline-flex items-center justify-center px-6 py-3 min-w-48 w-fit text-sm font-medium tracking-wider rounded-lg transition-all duration-200 border-2;
+  }
+
+  .btn:hover {
+    transform: translateY(-2px);
+  }
+
+  /* Default Button Colors - Can be overridden by themes */
+  .btn-primary {
+    background-color: var(--theme-heading-alt);
+    color: var(--theme-btn-text);
+    border-color: transparent;
+  }
+
+  .btn-primary:hover {
+    @apply bg-secondary-dark text-primary-dark;
+  }
+
+  /* Outlined Button Colors - Can be overridden by themes */
+  .btn-outlined {
+    background-color: transparent;
+    color: var(--theme-heading-alt);
+    border-color: var(--theme-heading-alt);
+  }
+
+  .btn-outlined:hover {
+    background-color: var(--theme-heading-alt);
+    color: var(--primary-light);
+  }
+
+  /* Component Layout Classes - Mobile First */
+  .component-tile {
+    @apply min-h-80 min-w-72 w-full transition-transform duration-300 ease-out;
+  }
+
+  .component-tile:hover {
+    transform: translateY(-4px) scale(1.02);
+  }
+
+  /* Tiles should have rounded corners by default, but not when used as hero */
+  .component-tile:not(.hero-tile) {
+    @apply rounded-xl overflow-hidden;
+  }
+
+  .component-tile:not(.hero-tile) img {
+    @apply rounded-xl;
+  }
+
+  .hero-tile {
+    @apply rounded-none;
+  }
+
+  .hero-tile img {
+    @apply rounded-none;
+  }
+
+  .component-card {
+    @apply min-h-80 min-w-72 w-full sm:w-80 transition-transform duration-300 ease-out rounded-xl overflow-hidden;
+  }
+
+  .component-card:hover {
+    transform: translateY(-4px) scale(1.02);
+  }
+
+  .component-card img {
+    @apply rounded-xl;
+  }
+
+  .component-section {
+    @apply min-h-96;
+  }
+}
+
+/* Responsive Styles */
+@media (max-width: 768px) {
+  .container {
+    @apply px-5;
+  }
+
+  h1 {
+    @apply text-[32px] leading-[40px];
+  }
+}
+
+/* Focus States */
+.focus-visible {
+  @apply outline-2 outline-offset-2;
+}
+
+/* Screen Reader Only */
+.sr-only {
+  @apply absolute w-px h-px p-0 -m-px overflow-hidden whitespace-nowrap border-0;
+  clip: rect(0, 0, 0, 0);
+}
+
+/* Carousel Styles */
+.carousel-wrapper {
+  position: relative;
+}
+
+.carousel-wrapper .slick-slider {
+  position: relative;
+}
+
+.carousel-wrapper .slick-list {
+  margin: 0 -8px;
+}
+
+.carousel-wrapper .slick-track {
+  display: flex;
+  align-items: stretch;
+}
+
+.carousel-wrapper .slick-slide {
+  height: auto;
+}
+
+.carousel-wrapper .slick-slide > div {
+  height: 100%;
+}
+
+.carousel-wrapper .slick-prev,
+.carousel-wrapper .slick-next {
+  z-index: 10;
+}
+
+.carousel-wrapper .slick-prev {
+  left: -40px;
+}
+
+.carousel-wrapper .slick-next {
+  right: -40px;
+}
+
+.carousel-wrapper .slick-prev:before,
+.carousel-wrapper .slick-next:before {
+  display: none;
+}
+
+/* Mobile carousel specific styles */
+.mobile-carousel .slick-prev {
+  left: 10px;
+}
+
+.mobile-carousel .slick-next {
+  right: 10px;
+}
+
+/* Carousel dots styling - Base styles */
+.carousel-wrapper .slick-dots {
+  bottom: -45px;
+  display: flex !important;
+  justify-content: center;
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+
+.carousel-wrapper .slick-dots li {
+  margin: 0 5px;
+}
+
+.carousel-wrapper .slick-dots li button {
+  background: #d1d5db;
+  border: none;
+  border-radius: 50%;
+  cursor: pointer;
+  font-size: 0;
+  height: 12px;
+  outline: none;
+  padding: 0;
+  transition: all 0.2s ease;
+  width: 12px;
+}
+
+.carousel-wrapper .slick-dots li button:hover {
+  background: #9ca3af;
+}
+
+.carousel-wrapper .slick-dots li.slick-active button {
+  background: #6b7280;
+}
+
+.carousel-wrapper .slick-dots li button:before {
+  display: none;
+}
+
+/* Theme-specific carousel navigation styles */
+.theme-light .carousel-wrapper .slick-prev,
+.theme-light .carousel-wrapper .slick-next {
+  background: rgb(29, 15, 52);
+  color: rgb(255, 255, 255);
+  border-color: rgb(29, 15, 52);
+}
+
+.theme-light .carousel-wrapper .slick-prev:hover,
+.theme-light .carousel-wrapper .slick-next:hover {
+  background: rgb(245, 245, 245);
+  color: rgb(29, 15, 52);
+}
+
+.theme-light .carousel-wrapper .slick-dots li button {
+  background: rgba(29, 15, 52, 0.3);
+}
+
+.theme-light .carousel-wrapper .slick-dots li button:hover {
+  background: rgba(29, 15, 52, 0.6);
+}
+
+.theme-light .carousel-wrapper .slick-dots li.slick-active button {
+  background: rgb(29, 15, 52);
+}
+
+.theme-dark .carousel-wrapper .slick-prev,
+.theme-dark .carousel-wrapper .slick-next {
+  background: rgb(245, 245, 245);
+  color: rgb(29, 15, 52);
+  border-color: rgb(245, 245, 245);
+}
+
+.theme-dark .carousel-wrapper .slick-prev:hover,
+.theme-dark .carousel-wrapper .slick-next:hover {
+  background: rgb(255, 255, 255);
+  color: rgb(29, 15, 52);
+}
+
+.theme-dark .carousel-wrapper .slick-dots li button {
+  background: rgba(245, 245, 245, 0.3);
+}
+
+.theme-dark .carousel-wrapper .slick-dots li button:hover {
+  background: rgba(245, 245, 245, 0.6);
+}
+
+.theme-dark .carousel-wrapper .slick-dots li.slick-active button {
+  background: rgb(245, 245, 245);
+}
+
+.theme-accent .carousel-wrapper .slick-prev,
+.theme-accent .carousel-wrapper .slick-next {
+  background: rgb(92, 225, 230);
+  color: rgb(255, 255, 255);
+  border-color: rgb(92, 225, 230);
+}
+
+.theme-accent .carousel-wrapper .slick-prev:hover,
+.theme-accent .carousel-wrapper .slick-next:hover {
+  background: #647589;
+  color: rgb(29, 15, 52);
+}
+
+.theme-accent .carousel-wrapper .slick-dots li button {
+  background: rgba(92, 225, 230, 0.3);
+}
+
+.theme-accent .carousel-wrapper .slick-dots li button:hover {
+  background: rgba(92, 225, 230, 0.6);
+}
+
+.theme-accent .carousel-wrapper .slick-dots li.slick-active button {
+  background: rgb(92, 225, 230);
+}
+
+.theme-gradient .carousel-wrapper .slick-prev,
+.theme-gradient .carousel-wrapper .slick-next {
+  background: rgb(179, 29, 157);
+  color: rgb(255, 255, 255);
+  border-color: rgb(179, 29, 157);
+}
+
+.theme-gradient .carousel-wrapper .slick-prev:hover,
+.theme-gradient .carousel-wrapper .slick-next:hover {
+  background: rgb(32, 201, 151);
+  color: rgb(29, 15, 52);
+}
+
+.theme-gradient .carousel-wrapper .slick-dots li button {
+  background: rgba(179, 29, 157, 0.3);
+}
+
+.theme-gradient .carousel-wrapper .slick-dots li button:hover {
+  background: rgba(179, 29, 157, 0.6);
+}
+
+.theme-gradient .carousel-wrapper .slick-dots li.slick-active button {
+  background: rgb(179, 29, 157);
+}
+
+.theme-transparent-light .carousel-wrapper .slick-prev,
+.theme-transparent-light .carousel-wrapper .slick-next {
+  background: rgb(29, 15, 52);
+  color: rgb(255, 255, 255);
+  border-color: rgb(29, 15, 52);
+}
+
+.theme-transparent-light .carousel-wrapper .slick-prev:hover,
+.theme-transparent-light .carousel-wrapper .slick-next:hover {
+  background: rgb(32, 201, 151);
+  color: rgb(29, 15, 52);
+}
+
+.theme-transparent-light .carousel-wrapper .slick-dots li button {
+  background: rgba(29, 15, 52, 0.3);
+}
+
+.theme-transparent-light .carousel-wrapper .slick-dots li button:hover {
+  background: rgba(29, 15, 52, 0.6);
+}
+
+.theme-transparent-light .carousel-wrapper .slick-dots li.slick-active button {
+  background: rgb(29, 15, 52);
+}
+
+.theme-transparent-dark .carousel-wrapper .slick-prev,
+.theme-transparent-dark .carousel-wrapper .slick-next {
+  background: rgb(255, 255, 255);
+  color: rgb(29, 15, 52);
+  border-color: rgb(255, 255, 255);
+}
+
+.theme-transparent-dark .carousel-wrapper .slick-prev:hover,
+.theme-transparent-dark .carousel-wrapper .slick-next:hover {
+  background: rgb(32, 201, 151);
+  color: rgb(29, 15, 52);
+}
+
+.theme-transparent-dark .carousel-wrapper .slick-dots li button {
+  background: rgba(255, 255, 255, 0.3);
+}
+
+.theme-transparent-dark .carousel-wrapper .slick-dots li button:hover {
+  background: rgba(255, 255, 255, 0.6);
+}
+
+.theme-transparent-dark .carousel-wrapper .slick-dots li.slick-active button {
+  background: rgb(255, 255, 255);
+}
