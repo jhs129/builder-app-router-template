@@ -1,14 +1,14 @@
 import type { Meta, StoryObj } from "@storybook/nextjs";
-import { Header as GlobalHeader } from "@repo/components";
+import { CenterLogoHeader } from "@repo/components";
 
 const meta = {
-  title: "Navigation/GlobalHeader",
-  component: GlobalHeader,
+  title: "Navigation/CenterLogoHeader",
+  component: CenterLogoHeader,
   parameters: {
     layout: "fullscreen",
   },
   tags: ["autodocs"],
-} satisfies Meta<typeof GlobalHeader>;
+} satisfies Meta<typeof CenterLogoHeader>;
 
 export default meta;
 type Story = StoryObj<typeof meta>;

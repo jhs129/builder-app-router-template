@@ -6,6 +6,7 @@ import {
   themeableInputs as themeableInputsRaw,
 } from "@repo/types";
 import Header from "../components/navigation/Header";
+import CenterLogoHeader from "../components/navigation/CenterLogoHeader";
 import Footer from "../components/navigation/Footer";
 import VerticalNavigation from "../components/navigation/VerticalNavigation";
 
@@ -27,6 +28,21 @@ export const navigationComponents: RegisteredComponent[] = [
   {
     component: Header,
     name: "Header",
+    ...getImageConfig(),
+    inputs: [
+      { name: "navigation", type: "object", friendlyName: "Navigation" },
+      {
+        name: "logo",
+        type: "string",
+        friendlyName: "Logo URL",
+        defaultValue: "https://placehold.co/400x100.png?text=Logo",
+      },
+    ],
+  },
+  {
+    component: CenterLogoHeader,
+    name: "CenterLogoHeader",
+    friendlyName: "Center Logo Header",
     ...getImageConfig(),
     inputs: [
       { name: "navigation1", type: "object", friendlyName: "Primary Navigation" },

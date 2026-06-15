@@ -9,7 +9,7 @@ const meta = {
     docs: {
       description: {
         component:
-          "DefaultGlobalHeader component that fetches navigation data from Builder.io and renders the GlobalHeader component. Note: This component uses Builder.io and may not render properly in Storybook preview.",
+          "DefaultGlobalHeader component that fetches navigation data from Builder.io and renders the Header component. Note: This component uses Builder.io and may not render properly in Storybook preview.",
       },
     },
   },

@@ -29,11 +29,8 @@ const DefaultHeader = function() {
   const primaryNav =
     (siteContext?.data?.headerNavigation1?.value as Navigation) ||
     defaultNavigation;
-  const secondaryNav =
-    (siteContext?.data?.headerNavigation2?.value as Navigation) ||
-    defaultNavigation;
 
-  return <Header navigation1={primaryNav} navigation2={secondaryNav} />;
+  return <Header navigation={primaryNav} />;
 };
 
 export { DefaultHeader };

@@ -8,6 +8,7 @@ export function registerBuilderInsertMenus(): void {
     name: "Navigation",
     items: [
       { name: "Header" },
+      { name: "CenterLogoHeader" },
       { name: "Footer" },
       { name: "VerticalNavigation" },
     ],

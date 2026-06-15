@@ -111,10 +111,7 @@ export default async function Page({ params, searchParams }: PageRouteProps) {
 
   return (
     <div className="flex flex-col min-h-screen">
-      <Header
-        navigation1={page?.data?.headerNavigation1?.value}
-        navigation2={page?.data?.headerNavigation2?.value}
-      />
+      <Header navigation={page?.data?.headerNavigation1?.value} />
       <main id="main-content" className="flex-grow" role="main">
         {site && (
           <PageSchema
