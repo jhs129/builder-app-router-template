@@ -1,22 +1,45 @@
-"use client";
-
 import React from "react";
 import type { OrganizationSchema } from "@repo/types";
-import { useSiteContext } from "../../contexts/SiteContextProvider";
 
-export type OrganizationSchemaDataProps = Omit<
-  OrganizationSchema,
-  "@context" | "@type"
-> & {
-  logo?: Omit<NonNullable<OrganizationSchema["logo"]>, "@type">;
-  address?: Omit<NonNullable<OrganizationSchema["address"]>, "@type">;
-  contactPoint?: Array<
-    Omit<NonNullable<OrganizationSchema["contactPoint"]>[number], "@type">
-  >;
-  founders?: Array<
-    Omit<NonNullable<OrganizationSchema["founders"]>[number], "@type">
-  >;
-};
+export interface OrganizationLogoInput {
+  url: string;
+  width?: number;
+  height?: number;
+}
+
+export interface OrganizationAddressInput {
+  streetAddress?: string;
+  addressLocality?: string;
+  addressRegion?: string;
+  postalCode?: string;
+  addressCountry?: string;
+}
+
+export interface OrganizationContactPointInput {
+  contactType: string;
+  telephone?: string;
+  email?: string;
+  areaServed?: string;
+  availableLanguage?: string[];
+}
+
+export interface OrganizationFounderInput {
+  name: string;
+  url?: string;
+}
+
+export interface OrganizationSchemaDataProps {
+  name: string;
+  url?: string;
+  description?: string;
+  sameAs?: string[];
+  logo?: OrganizationLogoInput;
+  address?: OrganizationAddressInput;
+  contactPoint?: OrganizationContactPointInput[];
+  foundingDate?: string;
+  founders?: OrganizationFounderInput[];
+  "@id"?: string;
+}
 
 export const OrganizationSchemaData: React.FC<OrganizationSchemaDataProps> = ({
   name,
@@ -30,48 +53,22 @@ export const OrganizationSchemaData: React.FC<OrganizationSchemaDataProps> = ({
   founders,
   "@id": id,
 }) => {
-  // Try to get site context, but handle case where provider is not available
-  let siteContext = null;
-  try {
-    const context = useSiteContext();
-    siteContext = context.siteContext;
-  } catch {
-    // SiteContextProvider not available, continue without it
-  }
-  
-  // Generate organization ID from site context if not provided
-  const organizationId = id || `${process.env.NEXT_PUBLIC_SITE_URL}#organization`;
-  
-  const orgName = name || siteContext?.data.organization?.name;
-  const orgDescription = description || siteContext?.data.organization?.description;
-  const orgAddress = address || (siteContext?.data.organization?.address ? {
-    streetAddress: siteContext.data.organization.address.address1,
-    addressLocality: siteContext.data.organization.address.city,
-    addressRegion: siteContext.data.organization.address.state,
-    postalCode: siteContext.data.organization.address.postalCode,
-    addressCountry: siteContext.data.organization.address.country,
-  } : undefined);
-  const orgContactPoint = contactPoint || (siteContext?.data.contact ? [{
-    contactType: "customer service",
-    telephone: siteContext.data.contact.telephone,
-    email: siteContext.data.contact.email,
-    areaServed: siteContext.data.contact.areaServed,
-    availableLanguage: siteContext.data.contact.availableLanguages,
-  }] : undefined);
-  const orgSameAs = sameAs || siteContext?.data.socialNetworks?.map(network => network.href);
-  
+  // Generate organization ID from the site URL if not provided.
+  const organizationId =
+    id || `${process.env.NEXT_PUBLIC_SITE_URL}#organization`;
+
   // Don't render if no name is available
-  if (!orgName) {
+  if (!name) {
     return null;
   }
 
   const schemaData: OrganizationSchema = {
     "@context": "https://schema.org",
     "@type": "Organization",
-    name: orgName,
+    name,
     ...(organizationId && { "@id": organizationId }),
     ...(url && { url }),
-    ...(orgDescription && { description: orgDescription }),
+    ...(description && { description }),
     ...(logo && {
       logo: {
         "@type": "ImageObject",
@@ -80,23 +77,23 @@ export const OrganizationSchemaData: React.FC<OrganizationSchemaDataProps> = ({
         ...(logo.height && { height: logo.height }),
       },
     }),
-    ...(orgSameAs && { sameAs: orgSameAs }),
-    ...(orgAddress && {
+    ...(sameAs && { sameAs }),
+    ...(address && {
       address: {
         "@type": "PostalAddress",
-        ...(orgAddress.streetAddress && { streetAddress: orgAddress.streetAddress }),
-        ...(orgAddress.addressLocality && {
-          addressLocality: orgAddress.addressLocality,
+        ...(address.streetAddress && { streetAddress: address.streetAddress }),
+        ...(address.addressLocality && {
+          addressLocality: address.addressLocality,
         }),
-        ...(orgAddress.addressRegion && { addressRegion: orgAddress.addressRegion }),
-        ...(orgAddress.postalCode && { postalCode: orgAddress.postalCode }),
-        ...(orgAddress.addressCountry && {
-          addressCountry: orgAddress.addressCountry,
+        ...(address.addressRegion && { addressRegion: address.addressRegion }),
+        ...(address.postalCode && { postalCode: address.postalCode }),
+        ...(address.addressCountry && {
+          addressCountry: address.addressCountry,
         }),
       },
     }),
-    ...(orgContactPoint && {
-      contactPoint: orgContactPoint.map((contact) => ({
+    ...(contactPoint && {
+      contactPoint: contactPoint.map((contact) => ({
         "@type": "ContactPoint",
         contactType: contact.contactType,
         ...(contact.telephone && { telephone: contact.telephone }),
@@ -121,7 +118,9 @@ export const OrganizationSchemaData: React.FC<OrganizationSchemaDataProps> = ({
     <script
       type="application/ld+json"
       dangerouslySetInnerHTML={{
-        __html: JSON.stringify(schemaData),
+        // Escape `<` to < so CMS-sourced strings can't break out of the
+        // script tag (e.g. a value containing "</script>").
+        __html: JSON.stringify(schemaData).replace(/</g, "\\u003c"),
       }}
     />
   );

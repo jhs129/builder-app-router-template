@@ -18,6 +18,31 @@ export const revalidate = 5;
 const EXCLUDED_DIRECTORIES = ["/blogs"];
 const STANDALONE_PAGES = ["/404"];
 
+// Build a BreadcrumbList trail (Home + one entry per path segment) from the
+// resolved url path. Returns undefined for the site root, which has no trail.
+function buildBreadcrumb(urlPath: string, siteUrl: string) {
+  const segments = urlPath.split("/").filter(Boolean);
+  if (segments.length === 0) return undefined;
+
+  const toLabel = (segment: string) =>
+    segment
+      .replace(/[-_]/g, " ")
+      .replace(/\b\w/g, (char) => char.toUpperCase());
+
+  const crumbs = [{ position: 1, name: "Home", item: siteUrl }];
+  let path = "";
+  segments.forEach((segment, index) => {
+    path += `/${segment}`;
+    crumbs.push({
+      position: index + 2,
+      name: toLabel(segment),
+      item: `${siteUrl}${path}`,
+    });
+  });
+
+  return crumbs;
+}
+
 function shouldExcludePath(url: string): boolean {
   if (!url) return true;
   const isExcludedDirectory = EXCLUDED_DIRECTORIES.some((dir) =>
@@ -109,6 +134,11 @@ export default async function Page({ params, searchParams }: PageRouteProps) {
 
   const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || "";
 
+  const toIso = (timestamp?: number) =>
+    timestamp ? new Date(timestamp).toISOString() : undefined;
+
+  const orgAddress = site?.data.organization?.address;
+
   return (
     <div className="flex flex-col min-h-screen">
       <Header navigation={page?.data?.headerNavigation1?.value} />
@@ -122,9 +152,37 @@ export default async function Page({ params, searchParams }: PageRouteProps) {
             siteUrl={siteUrl}
             organizationName={site.data.organization?.name || site.data.siteName}
             organizationDescription={site.data.organization?.description}
+            logo={site.data.logo}
+            sameAs={site.data.socialNetworks?.map((network) => network.href)}
+            address={
+              orgAddress
+                ? {
+                    streetAddress: orgAddress.address1,
+                    addressLocality: orgAddress.city,
+                    addressRegion: orgAddress.state,
+                    postalCode: orgAddress.postalCode,
+                    addressCountry: orgAddress.country,
+                  }
+                : undefined
+            }
+            contactPoint={
+              site.data.contact
+                ? [
+                    {
+                      contactType: "customer service",
+                      telephone: site.data.contact.telephone,
+                      email: site.data.contact.email,
+                      areaServed: site.data.contact.areaServed,
+                      availableLanguage: site.data.contact.availableLanguages,
+                    },
+                  ]
+                : undefined
+            }
             image={page?.data?.image}
             keywords={page?.data?.metadata?.keywords}
-            isRoot={urlPath === "/"}
+            publishedDate={toIso(page?.firstPublished) || toIso(page?.lastUpdated)}
+            modifiedDate={toIso(page?.lastUpdated)}
+            breadcrumb={buildBreadcrumb(urlPath, siteUrl)}
           />
         )}
         <RenderBuilderContent

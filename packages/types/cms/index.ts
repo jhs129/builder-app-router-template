@@ -80,6 +80,8 @@ export interface ArticleData {
   excerpt: string;
   metadata: Metadata;
   publishDate: string;
+  dateModified?: string;
+  author?: string;
   blocks: any[];
 }
 

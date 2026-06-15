@@ -122,6 +122,10 @@ export default async function BlogPage({
               keywords: article.data?.keywords || [],
             },
             publishDate: new Date(rawPublishDate).toISOString(),
+            dateModified: article.lastUpdated
+              ? new Date(article.lastUpdated).toISOString()
+              : undefined,
+            author: article.data?.author,
             blocks: article.data?.blocks || [],
           },
           (siteContext as SiteContext | null) || undefined,
