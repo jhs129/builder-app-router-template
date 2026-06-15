@@ -2,6 +2,11 @@ import type { MetadataRoute } from "next";
 import { fetchEntries } from "@builder.io/sdk-react";
 import { BUILDER_API_KEY } from "../lib/builder";
 
+// Regenerate the sitemap at most once per day. Builder `fetchEntries` is an
+// uncached fetch in Next 16, so without this every crawler hit re-runs both
+// fetches and regenerates the document (Function Invocations + Edge Requests).
+export const revalidate = 86400;
+
 function getBaseUrl(): string {
   return (
     process.env.NEXT_PUBLIC_SITE_URL ||
