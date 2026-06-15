@@ -18,11 +18,16 @@ export function articleToSchemaData(
     description: article.metadata?.description,
     image: article.image,
     datePublished: article.publishDate,
+    dateModified: article.dateModified || article.publishDate,
     url,
+    mainEntityOfPage: { "@id": url },
     keywords: article.metadata?.keywords,
     articleSection: "Blog",
     wordCount: getArticleWordCount(article.blocks),
     inLanguage: "en-US",
+    ...(article.author && {
+      author: [{ name: article.author }],
+    }),
     ...(siteContext && {
       publisher: {
         name: siteContext.data.organization.name,
@@ -30,13 +35,11 @@ export function articleToSchemaData(
         ...(siteContext.data.logo && {
           logo: {
             url: siteContext.data.logo,
-            width: 200,
-            height: 60,
           },
         }),
       },
       isPartOf: {
-        "@id": baseUrl || "",
+        "@id": `${baseUrl || ""}#website`,
         name: siteContext.data.siteName,
         url: baseUrl,
       },

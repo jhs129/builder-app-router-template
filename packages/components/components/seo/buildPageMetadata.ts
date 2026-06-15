@@ -26,8 +26,6 @@ export function buildPageMetadata({
   author,
   keywords,
 }: BuildPageMetadataArgs): NextMetadata {
-  const fullTitle = siteName ? `${siteName} | ${title}` : title;
-
   const keywordList = Array.isArray(keywords)
     ? keywords
     : keywords
@@ -40,11 +38,11 @@ export function buildPageMetadata({
     type === "article" || type === "profile" ? type : "website";
 
   const metadata: NextMetadata = {
-    title: fullTitle,
+    title,
     description,
     keywords: keywordList,
     openGraph: {
-      title: fullTitle,
+      title,
       description,
       type: ogType,
       ...(url && { url }),
@@ -58,7 +56,7 @@ export function buildPageMetadata({
     },
     twitter: {
       card: "summary_large_image",
-      title: fullTitle,
+      title,
       description,
       ...(image && { images: [image] }),
     },

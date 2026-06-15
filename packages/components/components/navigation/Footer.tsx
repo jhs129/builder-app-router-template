@@ -64,15 +64,11 @@ const Footer = ({
           <Link href="/" className="block">
             <div className="relative w-40 md:w-[200px] h-[60px]">
               <Image
-                src="https://placehold.co/400x100/png?text=Logo"
+                src="https://placehold.co/400x100.png?text=Logo"
                 alt="Company Logo Image"
-                width={200}
-                height={60}
-                style={{
-                  width: "100%",
-                  height: "100%",
-                  objectFit: "contain",
-                }}
+                fill
+                sizes="(min-width: 768px) 200px, 160px"
+                style={{ objectFit: "contain" }}
                 priority={false}
               />
             </div>
