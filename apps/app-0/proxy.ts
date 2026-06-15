@@ -36,7 +36,11 @@ export const config = {
      * - _next/image (image optimization files)
      * - favicon.ico (favicon file)
      * - 500 (to prevent redirect loops)
+     * - static-asset extensions (images, fonts, css/js, txt/xml/map): these
+     *   bypass the proxy entirely so they incur no Edge Middleware Invocation.
+     *   Document extensions (.html/.pdf) are deliberately NOT excluded so any
+     *   legacy URL redirects still flow through the proxy.
      */
-    "/((?!api|_next/static|_next/image|favicon.ico|500).*)",
+    "/((?!api|_next/static|_next/image|favicon.ico|500|.*\\.(?:js|mjs|css|woff2?|ttf|otf|eot|png|jpe?g|gif|webp|avif|svg|ico|txt|xml|map)$).*)",
   ],
 };

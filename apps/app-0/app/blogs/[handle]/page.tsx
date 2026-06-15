@@ -17,7 +17,10 @@ import { BUILDER_API_KEY, getSiteContext } from "../../../lib/builder";
 import { isPreviewingFromSearchParams } from "../../../lib/page-utils";
 import RenderBuilderContent from "../../../components/RenderBuilderContent";
 
-export const revalidate = 5;
+// ISR window (seconds) for published Builder.io content. Must be a literal —
+// App Router segment config is statically analyzed and rejects runtime/env
+// expressions. Editors still get instant updates via Builder preview mode.
+export const revalidate = 300;
 
 function formatDate(timestamp: number): string {
   if (!timestamp) return "";
