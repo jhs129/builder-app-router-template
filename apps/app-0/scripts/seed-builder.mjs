@@ -1,0 +1,694 @@
+/**
+ * Builder.io provisioning / seed script.
+ *
+ * Run this once when bootstrapping a new Builder space from this template:
+ *
+ *   pnpm --filter app-0 init:builder
+ *
+ * It is idempotent — re-running it will skip anything that already exists.
+ *
+ * What it does:
+ *   1. Creates the `site-context` data model (via the Builder Admin GraphQL
+ *      API — the `addModel` mutation). The app's RootLayout calls
+ *      `getSiteContext()` which queries this model; without it the SDK throws
+ *      "Error fetching data."
+ *   2. Creates the `article` page model used by the /blogs/[handle] route and
+ *      the sitemap. Without it `next build` fails collecting that route with
+ *      "Model not found" when fetchEntries({ model: "article" }) 404s.
+ *   3. Creates the `navigation` data model and adds the header/footer
+ *      navigation reference fields to `site-context`. DefaultHeader and
+ *      DefaultFooter read `siteContext.data.headerNavigation1/2` and
+ *      `footerNavigation1` (resolved via `enrich: true`); without these the
+ *      header/footer fall back to empty menus.
+ *   4. Creates the shared `metadata` data model (SEO description + keywords) and
+ *      adds it as a `model`-type field to both the `article` and built-in `page`
+ *      models, so every model that maps 1:1 to a web page exposes the same
+ *      `data.metadata` shape (the `Metadata` type in @repo/types).
+ *   5. Sets the Dynamic Preview URL logic (`editingUrlLogic` — the code-mode
+ *      preview URL) on the built-in `page` model and the `article` model so the
+ *      Builder editor previews against the running app's routes.
+ *   6. Seeds a default `site-context` entry, a sample `article` entry, and
+ *      sample header + footer `navigation` entries (via the Builder Write REST
+ *      API), then wires the navigation references onto the `site-context`
+ *      entry so real menus render on first run. NOTE: the Admin GraphQL API has
+ *      no content-write mutation, so content creation must go through the Write
+ *      API. Model = GraphQL, content = REST.
+ *
+ * Credentials are read from apps/app-0/.env.local:
+ *   - BUILDER_PRIVATE_KEY          (bpk-...)  — required, for writes
+ *   - NEXT_PUBLIC_BUILDER_API_KEY             — required, to check existing content
+ *   - NEXT_PUBLIC_SITE_CONTEXT_NAME           — entry name the app queries by
+ */
+
+import { GraphQLClient, gql } from "graphql-request";
+import { readFileSync } from "node:fs";
+import { fileURLToPath } from "node:url";
+import { dirname, resolve } from "node:path";
+
+const __dirname = dirname(fileURLToPath(import.meta.url));
+
+// --- Load .env.local (standalone node scripts don't get Next's env loading) ---
+function loadEnvLocal() {
+  try {
+    const raw = readFileSync(resolve(__dirname, "..", ".env.local"), "utf8");
+    for (const line of raw.split("\n")) {
+      const match = line.match(/^\s*([A-Z0-9_]+)\s*=\s*(.*)\s*$/);
+      if (match && !process.env[match[1]]) {
+        process.env[match[1]] = match[2].replace(/^["']|["']$/g, "").trim();
+      }
+    }
+  } catch {
+    // No .env.local — fall back to whatever is already in the environment.
+  }
+}
+loadEnvLocal();
+
+const PRIVATE_KEY = process.env.BUILDER_PRIVATE_KEY;
+const PUBLIC_KEY = process.env.NEXT_PUBLIC_BUILDER_API_KEY;
+const SITE_CONTEXT_NAME =
+  process.env.NEXT_PUBLIC_SITE_CONTEXT_NAME || "builder-app-template";
+
+const MODEL_NAME = "site-context";
+const ARTICLE_MODEL_NAME = "article";
+const NAV_MODEL_NAME = "navigation";
+// Shared SEO metadata model, referenced as a `model`-type field by every model
+// that maps 1:1 to a web page (article, page) so they share one metadata shape.
+const METADATA_MODEL_NAME = "metadata";
+// Builder's built-in catch-all page model (not created by this script).
+const PAGE_MODEL_NAME = "page";
+const ADMIN_API = "https://cdn.builder.io/api/v2/admin";
+const writeApi = (model) => `https://builder.io/api/v1/write/${model}`;
+const writeUpdateApi = (model, id) =>
+  `https://builder.io/api/v1/write/${model}/${id}`;
+
+// A Builder reference value (write shape). When the entry is later fetched with
+// `enrich: true`, Builder resolves this into { "@type", id, model, value }.
+const referenceValue = (model, id) => ({
+  "@type": "@builder.io/core:Reference",
+  model,
+  id,
+});
+
+if (!PRIVATE_KEY) {
+  console.error("✗ BUILDER_PRIVATE_KEY is missing from apps/app-0/.env.local");
+  process.exit(1);
+}
+if (!PUBLIC_KEY) {
+  console.error("✗ NEXT_PUBLIC_BUILDER_API_KEY is missing from apps/app-0/.env.local");
+  process.exit(1);
+}
+
+const client = new GraphQLClient(ADMIN_API, {
+  headers: { Authorization: `Bearer ${PRIVATE_KEY}` },
+});
+
+// --- Field helper: Builder fills in the rest of the defaults server-side. ---
+const field = (name, type, extra = {}) => ({
+  "@type": "@builder.io/core:Field",
+  name,
+  type,
+  required: false,
+  helperText: "",
+  subFields: [],
+  ...extra,
+});
+
+// A `model`-type field embeds another model's schema inline. We use it to give
+// every page-like model the same `metadata` shape (resolves to the `Metadata`
+// type in @repo/types). The target model is referenced by `modelId`, which is
+// resolved at runtime (it differs per Builder space).
+const metadataField = (modelId) =>
+  field("metadata", "model", {
+    modelId,
+    helperText: "Shared SEO metadata (description + keywords).",
+  });
+
+// --- Navigation reference fields added to site-context. Each points at the
+// `navigation` model; DefaultHeader/DefaultFooter consume the enriched values. ---
+const SITE_CONTEXT_NAV_FIELDS = [
+  field("headerNavigation1", "reference", {
+    model: NAV_MODEL_NAME,
+    helperText: "Primary header navigation (references a navigation entry).",
+  }),
+  field("headerNavigation2", "reference", {
+    model: NAV_MODEL_NAME,
+    helperText: "Secondary header navigation (optional).",
+  }),
+  field("footerNavigation1", "reference", {
+    model: NAV_MODEL_NAME,
+    helperText: "Footer navigation (references a navigation entry).",
+  }),
+];
+
+// --- site-context model definition (mirrors the SiteContext type in @repo/types) ---
+const MODEL_BODY = {
+  name: MODEL_NAME,
+  kind: "data",
+  showTargeting: false,
+  fields: [
+    field("siteName", "text", {
+      helperText: "Display name of the site, used in metadata and schema.",
+      defaultValue: "Builder App Template",
+    }),
+    field("logo", "file", {
+      helperText: "Site logo image (used by the header and organization schema).",
+      allowedFileTypes: ["jpeg", "jpg", "png", "svg", "webp"],
+      defaultValue: "https://placehold.co/400x100.png?text=Logo",
+    }),
+    field("organization", "object", {
+      helperText: "Legal/organization details for SEO schema.",
+      subFields: [
+        field("name", "text", { defaultValue: "Builder App Template" }),
+        field("description", "longText"),
+        field("address", "object", {
+          subFields: [
+            field("address1", "text"),
+            field("city", "text"),
+            field("state", "text"),
+            field("postalCode", "text"),
+            field("country", "text", { defaultValue: "US" }),
+          ],
+        }),
+      ],
+    }),
+    field("contact", "object", {
+      helperText: "Primary contact details for organization schema.",
+      subFields: [
+        field("telephone", "text"),
+        field("email", "text"),
+        field("areaServed", "text"),
+        field("availableLanguages", "list", {
+          helperText: "Languages the organization serves customers in.",
+          subFields: [field("language", "text")],
+        }),
+      ],
+    }),
+    field("socialNetworks", "list", {
+      helperText: "Social profile links (rendered in the footer + schema sameAs).",
+      subFields: [field("name", "text"), field("href", "url")],
+    }),
+    field("googleAnalyticsId", "text", {
+      helperText: "Google Analytics measurement ID (e.g. G-XXXXXXX).",
+    }),
+    ...SITE_CONTEXT_NAV_FIELDS,
+  ],
+};
+
+// --- Default content seeded into the new model ---
+const DEFAULT_DATA = {
+  siteName: "Builder App Template",
+  logo: "https://placehold.co/400x100.png?text=Logo",
+  organization: {
+    name: "Builder App Template",
+    description:
+      "A starter template for building sites with Builder.io and the Next.js App Router.",
+    address: {
+      address1: "123 Main Street",
+      city: "San Francisco",
+      state: "CA",
+      postalCode: "94105",
+      country: "US",
+    },
+  },
+  contact: {
+    telephone: "+1-555-555-5555",
+    email: "hello@example.com",
+    areaServed: "US",
+    availableLanguages: ["English"],
+  },
+  socialNetworks: [
+    { name: "Twitter", href: "https://twitter.com" },
+    { name: "LinkedIn", href: "https://www.linkedin.com" },
+  ],
+  googleAnalyticsId: "",
+};
+
+// --- Dynamic Preview URL logic (Builder's `editingUrlLogic` on the model). ---
+// This is the "code" version of the preview URL (the `< >` toggle in the editor),
+// stored as a JS function body. Builder evaluates it to build the live preview
+// URL. Available objects include `space`, `content`, `targeting`, `locale`, etc.
+// NOTE: `examplePageUrl` is a SEPARATE field holding a static example URL — JS
+// logic must go in `editingUrlLogic` or it won't be treated as code.
+// See https://www.builder.io/c/docs/dynamic-preview-urls.
+
+// The page model is the catch-all route — preview the urlPath directly.
+const PAGE_PREVIEW_URL_LOGIC = "return `${space.siteUrl}${targeting.urlPath}`;";
+
+// Articles render at /blogs/<handle>; fall back to localhost when no site URL
+// is configured on the space.
+const ARTICLE_PREVIEW_URL_LOGIC = [
+  "const baseUrl = space.siteUrl || 'http://localhost:3000';",
+  "return `${baseUrl}/blogs/${content.data.handle || '_'}?preview=true`;",
+].join("\n");
+
+// --- metadata model definition (mirrors the Metadata type in @repo/types) ---
+// kind: "data" — a small reusable SEO block embedded via `model`-type fields.
+const METADATA_MODEL_BODY = {
+  name: METADATA_MODEL_NAME,
+  kind: "data",
+  showTargeting: false,
+  fields: [
+    field("description", "text", {
+      helperText: "SEO meta description for the page.",
+    }),
+    field("keywords", "Tags", {
+      helperText: "SEO keywords for the page.",
+    }),
+  ],
+};
+
+// --- article model definition (mirrors ArticleData in @repo/types) ---
+// kind: "page" so entries carry Builder visual-editor blocks, which the
+// /blogs/[handle] route renders via <RenderBuilderContent model="article">.
+const ARTICLE_MODEL_BODY = {
+  name: ARTICLE_MODEL_NAME,
+  kind: "page",
+  showTargeting: false,
+  editingUrlLogic: ARTICLE_PREVIEW_URL_LOGIC,
+  fields: [
+    field("handle", "text", {
+      helperText: "URL slug for the article (used at /blogs/<handle>).",
+      required: true,
+    }),
+    field("title", "text", { helperText: "Article headline." }),
+    field("subtitle", "text", { helperText: "Article subtitle / eyebrow." }),
+    field("image", "file", {
+      helperText: "Hero image for the article.",
+      allowedFileTypes: ["jpeg", "jpg", "png", "svg", "webp"],
+    }),
+    field("excerpt", "longText", {
+      helperText: "Short summary shown in listings and the hero.",
+    }),
+    field("publishDate", "date", {
+      helperText: "Publication date (used for schema + display).",
+    }),
+    // The `metadata` model-field is appended at runtime (it needs the resolved
+    // metadata model id) — see main().
+  ],
+};
+
+const SAMPLE_ARTICLE_HANDLE = "hello-world";
+
+const SAMPLE_ARTICLE_DATA = {
+  handle: SAMPLE_ARTICLE_HANDLE,
+  title: "Hello World",
+  subtitle: "Your first article",
+  image: "https://placehold.co/800x600/EEE/5ce1e6.png",
+  excerpt:
+    "A sample article seeded by the template. Edit or delete it in the Builder.io editor.",
+  publishDate: "2024-01-01",
+  metadata: {
+    description: "A sample article seeded by the Builder App Template.",
+    keywords: ["builder.io", "template", "blog"],
+  },
+};
+
+// --- navigation model definition (mirrors NavigationData in @repo/types) ---
+// kind: "data" — entries are a nested level1 → level2 → level3 menu tree.
+const NAV_MODEL_BODY = {
+  name: NAV_MODEL_NAME,
+  kind: "data",
+  showTargeting: false,
+  fields: [
+    field("level1", "list", {
+      helperText: "Top-level navigation items.",
+      subFields: [
+        field("text", "text", { required: true }),
+        field("href", "url"),
+        field("level2", "list", {
+          helperText: "Dropdown items under this top-level item.",
+          subFields: [
+            field("text", "text", { required: true }),
+            field("href", "url"),
+            field("level3", "list", {
+              helperText: "Nested items under this dropdown item.",
+              subFields: [
+                field("text", "text", { required: true }),
+                field("href", "url"),
+              ],
+            }),
+          ],
+        }),
+      ],
+    }),
+  ],
+};
+
+const PRIMARY_NAV_NAME = "primary-navigation";
+const PRIMARY_NAV_DATA = {
+  level1: [
+    { text: "Home", href: "/" },
+    {
+      text: "About",
+      href: "/about",
+      level2: [
+        { text: "Our Story", href: "/about/our-story" },
+        { text: "Team", href: "/about/team" },
+      ],
+    },
+    { text: "Blog", href: "/blogs" },
+    { text: "Contact", href: "/contact" },
+  ],
+};
+
+const FOOTER_NAV_NAME = "footer-navigation";
+const FOOTER_NAV_DATA = {
+  level1: [
+    { text: "Home", href: "/" },
+    { text: "About", href: "/about" },
+    { text: "Blog", href: "/blogs" },
+    { text: "Contact", href: "/contact" },
+  ],
+};
+
+const ADD_MODEL = gql`
+  mutation addModel($body: JSONObject!) {
+    addModel(body: $body) {
+      id
+      name
+    }
+  }
+`;
+
+const UPDATE_MODEL = gql`
+  mutation updateModel($body: UpdateModelInput!) {
+    updateModel(body: $body) {
+      id
+      name
+    }
+  }
+`;
+
+const LIST_MODELS = gql`
+  query {
+    models {
+      id
+      name
+      kind
+      fields
+      examplePageUrl
+      everything
+    }
+  }
+`;
+
+// Returns true if it created the model, false if it already existed.
+async function ensureModel(modelBody, existingNames) {
+  if (existingNames.has(modelBody.name)) {
+    console.log(`• Model "${modelBody.name}" already exists — skipping creation.`);
+    return false;
+  }
+  const { addModel } = await client.request(ADD_MODEL, { body: modelBody });
+  console.log(`✓ Created model "${addModel.name}" (id: ${addModel.id}).`);
+  return true;
+}
+
+// Like ensureModel but returns the model's id (whether it already existed or
+// was just created). Used for the metadata model, whose id other models embed.
+async function ensureModelReturningId(modelBody, models) {
+  const existing = models.find((m) => m.name === modelBody.name);
+  if (existing) {
+    console.log(`• Model "${modelBody.name}" already exists — skipping creation.`);
+    return existing.id;
+  }
+  const { addModel } = await client.request(ADD_MODEL, { body: modelBody });
+  console.log(`✓ Created model "${addModel.name}" (id: ${addModel.id}).`);
+  return addModel.id;
+}
+
+// Appends any of `requiredFields` missing from an existing model. Used to add
+// the navigation reference fields to a `site-context` model that predates them,
+// and the shared `metadata` field to the article/page models.
+// `models` is the list fetched at startup (includes id, kind, fields).
+async function ensureModelHasFields(modelName, requiredFields, models) {
+  const model = models.find((m) => m.name === modelName);
+  if (!model) {
+    console.log(`• Model "${modelName}" not found — skipping field check.`);
+    return;
+  }
+  const existing = Array.isArray(model.fields) ? model.fields : [];
+  const existingNames = new Set(existing.map((f) => f.name));
+  const missing = requiredFields.filter((f) => !existingNames.has(f.name));
+  if (missing.length === 0) {
+    console.log(`• Model "${modelName}" already has required field(s) — skipping.`);
+    return;
+  }
+  // UpdateModelInput is { id, data } — and name/kind are immutable, so the
+  // `data` payload carries only the (full) replacement fields array.
+  const newFields = [...existing, ...missing];
+  await client.request(UPDATE_MODEL, {
+    body: { id: model.id, data: { fields: newFields } },
+  });
+  // Keep the in-memory model in sync so later mutations (e.g. removeModelField)
+  // build on this updated fields array rather than clobbering it.
+  model.fields = newFields;
+  console.log(
+    `✓ Added ${missing.map((f) => `"${f.name}"`).join(", ")} field(s) to "${modelName}".`
+  );
+}
+
+// Removes a field from an existing model if present. Used to drop the orphaned
+// top-level `description` field from the built-in `page` model — SEO description
+// now lives on the shared `metadata` model-field. Idempotent: no-ops when the
+// field is already gone (e.g. a fresh Builder space).
+async function removeModelField(modelName, fieldName, models) {
+  const model = models.find((m) => m.name === modelName);
+  if (!model) {
+    console.log(`• Model "${modelName}" not found — skipping field removal.`);
+    return;
+  }
+  const existing = Array.isArray(model.fields) ? model.fields : [];
+  if (!existing.some((f) => f.name === fieldName)) {
+    console.log(`• Model "${modelName}" has no "${fieldName}" field — skipping removal.`);
+    return;
+  }
+  const newFields = existing.filter((f) => f.name !== fieldName);
+  await client.request(UPDATE_MODEL, {
+    body: { id: model.id, data: { fields: newFields } },
+  });
+  model.fields = newFields;
+  console.log(`✓ Removed "${fieldName}" field from "${modelName}".`);
+}
+
+// Sets the model's Dynamic Preview URL logic — the code-mode preview URL stored
+// in `editingUrlLogic` (NOT `examplePageUrl`, which holds a static example URL).
+// `models` is the startup list (each model carries `everything`, the full model
+// JSON, where `editingUrlLogic` lives). Idempotent and non-clobbering: it skips
+// when the existing logic already contains our `return` statement (so a
+// hand-edited value with Builder's comment header is preserved), and it clears
+// any stale JS that an earlier version of this script wrote into examplePageUrl.
+async function ensurePreviewUrl(modelName, logic, models) {
+  const model = models.find((m) => m.name === modelName);
+  if (!model) {
+    console.log(`• Model "${modelName}" not found — skipping preview URL.`);
+    return;
+  }
+
+  const current = model.everything?.editingUrlLogic || "";
+  // The return statement is the signature — present whether or not Builder's
+  // boilerplate comment header wraps it.
+  const signature =
+    logic.split("\n").find((line) => line.trim().startsWith("return")) || logic;
+
+  const data = {};
+  if (!current.includes(signature)) data.editingUrlLogic = logic;
+
+  // Self-heal: an earlier version wrote JS into examplePageUrl (a static-URL
+  // field). If it looks like code, clear it so only editingUrlLogic holds logic.
+  const example = model.examplePageUrl || "";
+  if (example.includes("return ") || example.trimStart().startsWith("const ")) {
+    data.examplePageUrl = "";
+  }
+
+  if (Object.keys(data).length === 0) {
+    console.log(`• Model "${modelName}" preview URL already set — skipping.`);
+    return;
+  }
+
+  await client.request(UPDATE_MODEL, { body: { id: model.id, data } });
+  console.log(`✓ Set preview URL logic on "${modelName}".`);
+}
+
+// Returns the first matching content entry, or null.
+async function getEntry(model, name) {
+  const url =
+    `https://cdn.builder.io/api/v3/content/${model}` +
+    `?apiKey=${PUBLIC_KEY}` +
+    `&query.name=${encodeURIComponent(name)}` +
+    `&limit=1&cachebust=true&noTargeting=true`;
+  const res = await fetch(url);
+  if (!res.ok) return null;
+  const json = await res.json();
+  return Array.isArray(json.results) && json.results.length > 0
+    ? json.results[0]
+    : null;
+}
+
+// Creates the entry if it doesn't exist. Returns the entry id either way.
+async function ensureContent(model, name, data) {
+  const existing = await getEntry(model, name);
+  if (existing) {
+    console.log(
+      `• Entry "${name}" already exists in "${model}" — skipping seed.`
+    );
+    return existing.id;
+  }
+  const res = await fetch(writeApi(model), {
+    method: "POST",
+    headers: {
+      Authorization: `Bearer ${PRIVATE_KEY}`,
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify({ name, published: "published", data }),
+  });
+  if (!res.ok) {
+    const text = await res.text();
+    throw new Error(`Write API failed (${res.status}): ${text}`);
+  }
+  const created = await res.json();
+  console.log(`✓ Seeded "${model}" entry "${name}" (id: ${created.id}).`);
+  return created.id;
+}
+
+// Seeds the site-context entry wired to the navigation entries, or patches an
+// existing entry to add any missing navigation references. Sends the full
+// merged `data` so the PATCH can't drop unrelated fields.
+async function ensureSiteContext(headerNavId, footerNavId) {
+  const refs = {};
+  if (headerNavId)
+    refs.headerNavigation1 = referenceValue(NAV_MODEL_NAME, headerNavId);
+  if (footerNavId)
+    refs.footerNavigation1 = referenceValue(NAV_MODEL_NAME, footerNavId);
+
+  const existing = await getEntry(MODEL_NAME, SITE_CONTEXT_NAME);
+  if (!existing) {
+    const res = await fetch(writeApi(MODEL_NAME), {
+      method: "POST",
+      headers: {
+        Authorization: `Bearer ${PRIVATE_KEY}`,
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        name: SITE_CONTEXT_NAME,
+        published: "published",
+        data: { ...DEFAULT_DATA, ...refs },
+      }),
+    });
+    if (!res.ok) {
+      const text = await res.text();
+      throw new Error(`Write API failed (${res.status}): ${text}`);
+    }
+    const created = await res.json();
+    console.log(
+      `✓ Seeded "${MODEL_NAME}" entry "${SITE_CONTEXT_NAME}" with navigation references (id: ${created.id}).`
+    );
+    return;
+  }
+
+  // Existing entry: only add references it's missing, then PATCH the merged data.
+  const data = existing.data || {};
+  const patch = {};
+  if (headerNavId && !data.headerNavigation1)
+    patch.headerNavigation1 = refs.headerNavigation1;
+  if (footerNavId && !data.footerNavigation1)
+    patch.footerNavigation1 = refs.footerNavigation1;
+
+  if (Object.keys(patch).length === 0) {
+    console.log(`• "${SITE_CONTEXT_NAME}" already wired to navigation — skipping.`);
+    return;
+  }
+
+  const res = await fetch(writeUpdateApi(MODEL_NAME, existing.id), {
+    method: "PATCH",
+    headers: {
+      Authorization: `Bearer ${PRIVATE_KEY}`,
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify({ data: { ...data, ...patch } }),
+  });
+  if (!res.ok) {
+    const text = await res.text();
+    throw new Error(`Write API failed (${res.status}): ${text}`);
+  }
+  console.log(
+    `✓ Wired ${Object.keys(patch).map((k) => `"${k}"`).join(", ")} on "${SITE_CONTEXT_NAME}".`
+  );
+}
+
+async function main() {
+  console.log(`\nProvisioning Builder space...\n`);
+
+  const { models } = await client.request(LIST_MODELS);
+  const existingNames = new Set(models.map((m) => m.name));
+
+  const createdSiteContext = await ensureModel(MODEL_BODY, existingNames);
+
+  // The metadata model must exist before article/page can embed it: a
+  // `model`-type field points at it by id, which differs per Builder space.
+  const metadataModelId = await ensureModelReturningId(METADATA_MODEL_BODY, models);
+  const metaField = metadataField(metadataModelId);
+
+  // Give a freshly-created article the metadata field at creation time.
+  ARTICLE_MODEL_BODY.fields.push(metaField);
+  const createdArticle = await ensureModel(ARTICLE_MODEL_BODY, existingNames);
+  const createdNav = await ensureModel(NAV_MODEL_BODY, existingNames);
+
+  // A pre-existing site-context model predates the navigation reference fields
+  // (which a fresh MODEL_BODY already includes) — add them so the header/footer
+  // can resolve real menus.
+  if (!createdSiteContext) {
+    await ensureModelHasFields(MODEL_NAME, SITE_CONTEXT_NAV_FIELDS, models);
+  }
+
+  // Every page-like model shares the same metadata shape. The built-in `page`
+  // model always needs it added; an existing `article` model (one that predates
+  // this field, or was created before the push above ran) gets it here too.
+  if (!createdArticle) {
+    await ensureModelHasFields(ARTICLE_MODEL_NAME, [metaField], models);
+  }
+  await ensureModelHasFields(PAGE_MODEL_NAME, [metaField], models);
+
+  // The page model's old top-level `description` field is orphaned — SEO
+  // description now comes from the shared `metadata` model-field.
+  await removeModelField(PAGE_MODEL_NAME, "description", models);
+
+  // Dynamic preview URLs: the built-in `page` model always needs it set here;
+  // the `article` model gets it from ARTICLE_MODEL_BODY when freshly created,
+  // otherwise update the existing model.
+  await ensurePreviewUrl(PAGE_MODEL_NAME, PAGE_PREVIEW_URL_LOGIC, models);
+  if (!createdArticle) {
+    await ensurePreviewUrl(ARTICLE_MODEL_NAME, ARTICLE_PREVIEW_URL_LOGIC, models);
+  }
+
+  // The CDN takes a moment to register a brand-new model before it will
+  // accept writes against it.
+  if (createdSiteContext || createdArticle || createdNav) {
+    await new Promise((r) => setTimeout(r, 2000));
+  }
+
+  await ensureContent(
+    ARTICLE_MODEL_NAME,
+    SAMPLE_ARTICLE_HANDLE,
+    SAMPLE_ARTICLE_DATA
+  );
+
+  // Seed the sample menus first, then wire their ids onto site-context.
+  const headerNavId = await ensureContent(
+    NAV_MODEL_NAME,
+    PRIMARY_NAV_NAME,
+    PRIMARY_NAV_DATA
+  );
+  const footerNavId = await ensureContent(
+    NAV_MODEL_NAME,
+    FOOTER_NAV_NAME,
+    FOOTER_NAV_DATA
+  );
+  await ensureSiteContext(headerNavId, footerNavId);
+
+  console.log("\nDone. Restart the dev server if it's running.\n");
+}
+
+main().catch((err) => {
+  console.error("\n✗ Seed failed:", err.message || err);
+  process.exit(1);
+});

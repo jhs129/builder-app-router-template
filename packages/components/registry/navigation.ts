@@ -31,7 +31,12 @@ export const navigationComponents: RegisteredComponent[] = [
     inputs: [
       { name: "navigation1", type: "object", friendlyName: "Primary Navigation" },
       { name: "navigation2", type: "object", friendlyName: "Secondary Navigation" },
-      { name: "logo", type: "string", friendlyName: "Logo URL" },
+      {
+        name: "logo",
+        type: "string",
+        friendlyName: "Logo URL",
+        defaultValue: "https://placehold.co/400x100.png?text=Logo",
+      },
     ],
   },
   {

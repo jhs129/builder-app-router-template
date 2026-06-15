@@ -54,7 +54,7 @@ const defaultSecondaryNav: Navigation = {
 const Header = ({
   navigation1: primaryNav = defaultPrimaryNav,
   navigation2: secondaryNav = defaultSecondaryNav,
-  logo = "https://placehold.co/400x100/png?text=Logo",
+  logo,
 }: HeaderProps) => {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const [openDropdown, setOpenDropdown] = useState<string | null>(null);
@@ -67,6 +67,11 @@ const Header = ({
 
   // Combine items for mobile menu
   const mobileNavItems = [...leftNavItems, ...rightNavItems];
+
+  // The Builder SDK passes "" for an unset string input, which bypasses JS
+  // default parameters (those only apply to `undefined`). Coalesce any
+  // empty/undefined value so next/image never receives an empty src.
+  const logoSrc = logo || "https://placehold.co/400x100.png?text=Logo";
 
   const { siteContext } = useSiteContext();
 
@@ -262,7 +267,7 @@ const Header = ({
           <Link href="/" className="block">
             <div className="relative w-32 h-[40px]">
               <Image
-                src={logo}
+                src={logoSrc}
                 alt={`${siteContext?.data?.siteName} Logo`}
                 width={128}
                 height={40}
@@ -293,7 +298,7 @@ const Header = ({
           <Link href="/" className="block">
             <div className="relative w-[200px] h-[60px]">
               <Image
-                src={logo}
+                src={logoSrc}
                 alt={`${siteContext?.data?.siteName} Logo`}
                 width={200}
                 height={60}
