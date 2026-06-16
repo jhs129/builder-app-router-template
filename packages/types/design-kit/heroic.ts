@@ -7,6 +7,7 @@ export const heroicInputs = [
     {
       name: "headline",
       type: "string",
+      defaultValue: "Your headline text here",
       helperText: "Main heading text for this component",
     },
     {

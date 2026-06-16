@@ -4,7 +4,7 @@ import {
   handleLocaleRedirect,
   handleErrorRedirect,
   handleDeploymentProtection,
-} from "@repo/components/utils";
+} from "@repo/components/utils/middlewareUtils";
 
 export function proxy(request: NextRequest) {
   // Use the shared error redirect handler
