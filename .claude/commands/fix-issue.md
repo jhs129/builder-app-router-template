@@ -88,7 +88,7 @@ Follow all steps in `.claude/commands/pr.md`.
 
 The workflow will:
 - Detect Vercel preview deployment
-- Bump the version and push
+- Push the branch
 - Create the PR
 - Post links to the Jira bug ticket and transition it to In Review
 
