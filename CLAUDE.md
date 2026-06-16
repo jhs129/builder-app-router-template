@@ -128,6 +128,13 @@ This project uses the Gen 2 React SDK (`@builder.io/sdk-react`), which is built 
 - Use `isPreviewing` / `isEditing` to detect the Builder.io editor environment.
 - Components are registered via `RegisteredComponent[]` arrays.
 
+**URL Redirects (`url-redirect` model):**
+- Redirect rules live in the Builder.io `url-redirect` data model, not in code. Each entry holds a `redirects` list; each rule has `urlFrom`, `urlTo`, and `permanentRedirect` (308 vs 307).
+- `apps/app-0/lib/redirects.ts` fetches every entry at **build time** via `fetchEntries` and maps the rules into the Next.js `redirects()` config in `apps/app-0/next.config.ts`.
+- The fetch fails open — a missing model or network error logs and returns zero redirects rather than breaking the build.
+- The model and a sample rule are provisioned by `scripts/seed-builder.mjs` (`pnpm --filter app-0 init:builder`).
+- Changes take effect on the next deploy. For request-time redirects (very large rule sets or per-domain logic), move to a `proxy.ts`/middleware approach reading a generated JSON file.
+
 **Component Registration Process:**
 1. Create component in appropriate `packages/components/components/` subdirectory
 2. Register component in corresponding `packages/components/registry/` file

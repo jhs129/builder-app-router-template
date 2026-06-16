@@ -27,12 +27,16 @@
  *   5. Sets the Dynamic Preview URL logic (`editingUrlLogic` — the code-mode
  *      preview URL) on the built-in `page` model and the `article` model so the
  *      Builder editor previews against the running app's routes.
- *   6. Seeds a default `site-context` entry, a sample `article` entry, and
- *      sample header + footer `navigation` entries (via the Builder Write REST
- *      API), then wires the navigation references onto the `site-context`
- *      entry so real menus render on first run. NOTE: the Admin GraphQL API has
- *      no content-write mutation, so content creation must go through the Write
- *      API. Model = GraphQL, content = REST.
+ *   6. Creates the `url-redirect` data model — a single entry holding a
+ *      `redirects` list (urlFrom, urlTo, permanentRedirect). The main app's
+ *      next.config.ts `redirects()` fetches this at build time and hands the
+ *      rules to Next.js. Without the model that build-time fetch 404s.
+ *   7. Seeds a default `site-context` entry, a sample `article` entry, sample
+ *      header + footer `navigation` entries, and a sample `url-redirect` entry
+ *      (via the Builder Write REST API), then wires the navigation references
+ *      onto the `site-context` entry so real menus render on first run. NOTE:
+ *      the Admin GraphQL API has no content-write mutation, so content creation
+ *      must go through the Write API. Model = GraphQL, content = REST.
  *
  * Credentials are read from apps/app-0/.env.local:
  *   - BUILDER_PRIVATE_KEY          (bpk-...)  — required, for writes
@@ -74,6 +78,9 @@ const NAV_MODEL_NAME = "navigation";
 // Shared SEO metadata model, referenced as a `model`-type field by every model
 // that maps 1:1 to a web page (article, page) so they share one metadata shape.
 const METADATA_MODEL_NAME = "metadata";
+// URL redirect model — a single entry holds a list of redirect rules that the
+// main app's next.config.ts applies at build time.
+const URL_REDIRECT_MODEL_NAME = "url-redirect";
 // Builder's built-in catch-all page model (not created by this script).
 const PAGE_MODEL_NAME = "page";
 const ADMIN_API = "https://cdn.builder.io/api/v2/admin";
@@ -361,6 +368,47 @@ const FOOTER_NAV_DATA = {
   ],
 };
 
+// --- url-redirect model definition (mirrors UrlRedirectData in @repo/types) ---
+// kind: "data" — a single entry holds a `redirects` list. next.config.ts fetches
+// this list at build time and returns it from Next.js's `redirects()` (so editors
+// manage redirects in the Builder UI; changes take effect on the next deploy).
+const URL_REDIRECT_MODEL_BODY = {
+  name: URL_REDIRECT_MODEL_NAME,
+  kind: "data",
+  showTargeting: false,
+  fields: [
+    field("redirects", "list", {
+      helperText:
+        "Redirect rules applied at build time. Paths support Next.js matching, e.g. /old/:slug*.",
+      subFields: [
+        field("urlFrom", "text", {
+          required: true,
+          helperText: "Source path to match, e.g. /old-page or /blog/:slug*.",
+        }),
+        field("urlTo", "text", {
+          required: true,
+          helperText: "Destination path or URL, e.g. /new-page or /posts/:slug*.",
+        }),
+        field("permanentRedirect", "boolean", {
+          defaultValue: true,
+          helperText: "On → 308 (permanent). Off → 307 (temporary).",
+        }),
+      ],
+    }),
+  ],
+};
+
+const URL_REDIRECT_ENTRY_NAME = "redirects";
+const URL_REDIRECT_DATA = {
+  redirects: [
+    {
+      urlFrom: "/old-home",
+      urlTo: "/",
+      permanentRedirect: true,
+    },
+  ],
+};
+
 const ADD_MODEL = gql`
   mutation addModel($body: JSONObject!) {
     addModel(body: $body) {
@@ -632,6 +680,10 @@ async function main() {
   ARTICLE_MODEL_BODY.fields.push(metaField);
   const createdArticle = await ensureModel(ARTICLE_MODEL_BODY, existingNames);
   const createdNav = await ensureModel(NAV_MODEL_BODY, existingNames);
+  const createdUrlRedirect = await ensureModel(
+    URL_REDIRECT_MODEL_BODY,
+    existingNames
+  );
 
   // A pre-existing site-context model predates the navigation reference fields
   // (which a fresh MODEL_BODY already includes) — add them so the header/footer
@@ -662,7 +714,7 @@ async function main() {
 
   // The CDN takes a moment to register a brand-new model before it will
   // accept writes against it.
-  if (createdSiteContext || createdArticle || createdNav) {
+  if (createdSiteContext || createdArticle || createdNav || createdUrlRedirect) {
     await new Promise((r) => setTimeout(r, 2000));
   }
 
@@ -684,6 +736,14 @@ async function main() {
     FOOTER_NAV_DATA
   );
   await ensureSiteContext(headerNavId, footerNavId);
+
+  // Seed the sample redirect entry. next.config.ts reads this model by name at
+  // build time, so a single well-known entry name keeps the lookup simple.
+  await ensureContent(
+    URL_REDIRECT_MODEL_NAME,
+    URL_REDIRECT_ENTRY_NAME,
+    URL_REDIRECT_DATA
+  );
 
   console.log("\nDone. Restart the dev server if it's running.\n");
 }
