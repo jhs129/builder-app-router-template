@@ -2,6 +2,9 @@
   "name": "@jhs129/builder-app-router-template",
   "version": "0.1.0",
   "private": true,
+  "license": "SEE LICENSE IN LICENSE",
+  "author": "JHS Digital Consulting, LLC (https://www.jhsdigitalconsulting.com)",
+  "homepage": "https://www.jhsdigitalconsulting.com",
   "packageManager": "pnpm@9.15.4",
   "scripts": {
     "setup": "node scripts/setup.mjs",
