@@ -46,13 +46,16 @@ Extract the summary and acceptance criteria from the description to use in the P
 
 ---
 
-## Step 3: Verify the Build is Clean
+## Step 3: Verify Everything is Committed and the Build is Clean
 
+First, confirm there are no uncommitted changes (from Step 1's `git status`). If there are, warn the user and ask whether they want to commit them first before proceeding. Do not silently stash or discard anything.
+
+Then verify the full build, lint, and Storybook build all pass:
 ```bash
-pnpm build && pnpm lint
+pnpm build && pnpm lint && pnpm build:storybook
 ```
 
-If the build fails, stop and tell the user to fix the errors before creating the PR. Do not proceed.
+If any of these fail, stop and tell the user to fix the errors before creating the PR. Do not proceed.
 
 ---
 
@@ -67,7 +70,7 @@ git diff main...HEAD
 Dispatch a `pr-review-toolkit:code-reviewer` subagent. Pass it:
 - The full output of `git diff main...HEAD`
 - The changed file list from `git diff main...HEAD --name-only`
-- This context: "Next.js 16 App Router project on a Turborepo monorepo (apps/, packages/) using the Builder.io Gen 2 SDK (@builder.io/sdk-react) and pnpm. Key conventions in CLAUDE.md: shared components live in packages/components/components/, registered in packages/components/registry/ and added to an insert menu in packages/components/builder-registry.ts; a Storybook story is required in apps/storybook/stories/ for each new component; use Tailwind tokens (never hardcode hex or arbitrary bg-[#xxx]); components over 100 lines are split into a directory <Name>/index.tsx; use pnpm."
+- This context: "Next.js 16 App Router project on a Turborepo monorepo (apps/, packages/) using the Builder.io Gen 2 SDK (@builder.io/sdk-react) and pnpm. Key conventions in CLAUDE.md and packages/components/COMPONENT_PATTERN.md: each component is self-contained in its own folder packages/components/components/{category}/{Name}/ with index.tsx (component + Props), a co-located {Name}.stories.tsx, and — only if registered with Builder.io — a {Name}.builder.registration.tsx that exports registration: RegisteredComponent[] using withImage() and shared input bundles from registry/shared.ts; registrations are concatenated by thin registry/{category}.ts barrels and the app layer (apps/app-0/registry/) owns the final component list and insert menus; use Tailwind tokens (never hardcode hex or arbitrary bg-[#xxx]); components over 100 lines are split into sibling files in the same folder; default placehold.co images use a .png extension; use pnpm."
 
 **If no blockers found:** Proceed to Step 5.
 
@@ -244,7 +247,6 @@ addCommentToJiraIssue(
 
 ## Notes
 
-- If there are uncommitted changes, warn the user and ask if they want to commit them first before proceeding. Do not silently stash or discard anything.
 - If the branch is already pushed and has an open PR, show the existing PR URL and stop.
 - Always look at ALL commits on the branch (not just the latest) when writing the PR description.
 - Project config: read `.claude/project-config.md` for the Jira project key, cloud ID, base URL, and Vercel project name. If **Configured: no**, skip all Jira steps and proceed without them.
