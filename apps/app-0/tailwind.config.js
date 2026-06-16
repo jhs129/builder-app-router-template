@@ -24,6 +24,7 @@ module.exports = {
     // Ensure all background color classes for design kit are included
     "bg-primary-white",
     "bg-primary-light",
+    "bg-primary-parchment",
     "bg-secondary-light",
     "bg-primary-dark",
     "bg-secondary-dark",

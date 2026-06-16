@@ -16,21 +16,20 @@ export interface DesignTokens {
 
 export const DEFAULT_DESIGN_TOKENS: DesignTokens = {
   colors: [
-    // Primary Colors
-    { name: "Primary Dark", value: "var(--primary-dark, #1d0f34)" },
-    { name: "Primary Light", value: "var(--primary-light, #ffffff)" },
-    { name: "Secondary Light", value: "var(--secondary-light, #f5f5f5)" },
-    { name: "Secondary Dark", value: "var(--secondary-dark, #647589)" },
-    { name: "Primary Accent", value: "var(--primary-accent, #6610f2)" },
-    { name: "Secondary Accent", value: "var(--accent-purple, #6a0dad)" },
+    // Primary Colors — Chameleon Collective palette
+    { name: "Black", value: "var(--primary-dark, #121212)" },
+    { name: "White", value: "var(--primary-light, #ffffff)" },
+    { name: "Parchment", value: "var(--primary-parchment, #eae4c8)" },
+    { name: "Off-White", value: "var(--secondary-light, #f3f3f3)" },
+    { name: "Mid-Gray", value: "var(--secondary-dark, #5b5b5b)" },
+    { name: "Burnt Sienna", value: "var(--primary-accent, #ea633f)" },
 
     // Accent Colors
-    { name: "Emerald Green", value: "var(--accent-green, #20c997)" },
-    { name: "Deep Purple", value: "var(--accent-purple, #6a0dad)" },
-    { name: "Bright Magenta", value: "var(--accent-magenta, #b31d9d)" },
-    { name: "Bright Cyan", value: "var(--accent-cyan, #5ce1e6)" },
-    { name: "Sky Blue", value: "var(--accent-teal, #0dcaf0)" },
-    { name: "Light Purple", value: "var(--accent-light-purple, #8c52ff)" },
+    { name: "Straw", value: "var(--accent-green, #e8eb74)" },
+    { name: "Electric Blue", value: "var(--accent-cyan, #88e8f0)" },
+    { name: "Teal", value: "var(--accent-teal, #0097a7)" },
+    { name: "Orange", value: "var(--accent-magenta, #f78d1e)" },
+    { name: "Straw Dark", value: "var(--accent-light-purple, #ced167)" },
   ],
   fontFamily: [
     {

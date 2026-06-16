@@ -17,7 +17,7 @@
 
 /* Apply gradient background to elements that should have it */
 [data-theme="gradient"] {
-  background: linear-gradient(to right, var(--accent-purple), var(--accent-blue), var(--accent-cyan));
+  background: linear-gradient(to right, var(--accent-purple), var(--accent-green), var(--accent-cyan));
 }
 
 /* Override for specific components that need solid backgrounds */
