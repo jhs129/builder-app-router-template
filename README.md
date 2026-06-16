@@ -39,12 +39,13 @@ It will:
 
 `pnpm run setup` does this for you; run it directly when you only need to (re)seed models.
 
-The app reads two models that don't exist in a brand-new Builder space:
+The app reads models that don't exist in a brand-new Builder space:
 
 - **`site-context`** — global site data (name, logo, organization/contact details, social links) read by every page in the root layout.
 - **`article`** — the blog content model behind `/blogs/[handle]` and the sitemap.
+- **`url-redirect`** — a list of redirect rules applied at build time (see [URL redirects](#url-redirects)).
 
-Without them the app throws `"Error fetching data."` at runtime and `pnpm build` fails with `"Model not found"`. A one-time seed script creates both models and populates a default `site-context` entry plus a sample article:
+Without them the app throws `"Error fetching data."` at runtime and `pnpm build` fails with `"Model not found"`. A one-time seed script creates the models and populates a default `site-context` entry, a sample article, plus a sample redirect:
 
 ```bash
 # Requires BUILDER_PRIVATE_KEY in apps/app-0/.env.local (bpk-...)
@@ -63,13 +64,27 @@ pnpm dev
 
 Open [http://localhost:3000](http://localhost:3000) to view the app. Builder.io content is fetched and rendered through the App Router catch-all route in `apps/app-0/app/[[...page]]/`.
 
+## URL redirects
+
+Redirect rules are managed in the Builder.io **`url-redirect`** model — no code change or redeploy-by-hand required to add a rule, just edit content in Builder. Each entry holds a `redirects` list, and every rule has three fields:
+
+| Field | Description |
+| --- | --- |
+| `urlFrom` | Source path to match. Supports Next.js path syntax, e.g. `/old/:slug*`. |
+| `urlTo` | Destination path or URL, e.g. `/new-page`. |
+| `permanentRedirect` | On → **308** (permanent). Off → **307** (temporary). Defaults to permanent. |
+
+[`apps/app-0/lib/redirects.ts`](./apps/app-0/lib/redirects.ts) reads every entry and feeds the rules into Next.js's [`redirects()`](https://nextjs.org/docs/app/api-reference/config/next-config-js/redirects) in [`next.config.ts`](./apps/app-0/next.config.ts).
+
+This runs at **build time** — redirect changes in Builder take effect on the next deploy. That keeps redirects fast (handled by Next/the CDN with no per-request fetch) and is the right trade-off for most sites. The fetch fails open: a missing model or network error logs a warning and ships zero redirects rather than breaking the build. If a project outgrows Next's ~1,024-redirect limit or needs per-domain rules, graduate to a `proxy.ts`/middleware approach that reads a generated JSON file at request time.
+
 ## Common Commands
 
 | Command | Description |
 | --- | --- |
 | `pnpm run setup` | Guided first-run setup: API keys, optional app rename, Builder provisioning |
 | `pnpm dev` | Start the development server (port 3000) |
-| `pnpm --filter app-0 init:builder` | Provision the `site-context` + `article` models in a fresh Builder space |
+| `pnpm --filter app-0 init:builder` | Provision the `site-context`, `article`, and `url-redirect` models in a fresh Builder space |
 | `pnpm build` | Build all apps except Storybook |
 | `pnpm build-all` | Build everything, including Storybook |
 | `pnpm lint` | Lint the workspace |

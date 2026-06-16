@@ -29,6 +29,25 @@ export interface SocialNetwork {
   href: string;
 }
 
+// A single redirect rule. `urlFrom`/`urlTo` accept plain paths or Next.js
+// path-matching syntax (e.g. `/old/:slug*`). `permanentRedirect` selects the
+// HTTP status: true → 308 (permanent), false → 307 (temporary).
+export interface UrlRedirect {
+  urlFrom: string;
+  urlTo: string;
+  permanentRedirect?: boolean;
+}
+
+// Shape of a `url-redirect` model entry's `data`. A single entry holds many
+// rules so all redirects can be managed from one place in the Builder editor.
+export interface UrlRedirectData {
+  redirects: UrlRedirect[];
+}
+
+export interface UrlRedirects extends Content {
+  data: UrlRedirectData;
+}
+
 export interface PageData {
   title: string;
   image: string;
