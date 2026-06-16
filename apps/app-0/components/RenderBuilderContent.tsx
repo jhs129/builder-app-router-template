@@ -2,7 +2,8 @@
 
 import React, { useEffect } from "react";
 import { Content } from "@builder.io/sdk-react";
-import { customComponents, registerBuilderEditor } from "@repo/components";
+import { customComponents } from "../registry";
+import { registerEditor } from "../registry/register";
 import { BUILDER_API_KEY } from "../lib/builder";
 import { injectThemeStyles } from "../lib/theme-injection";
 
@@ -22,7 +23,7 @@ export default function RenderBuilderContent({
   locale,
 }: RenderBuilderContentProps) {
   useEffect(() => {
-    registerBuilderEditor();
+    registerEditor();
     injectThemeStyles();
   }, []);
 

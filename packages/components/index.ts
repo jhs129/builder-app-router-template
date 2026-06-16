@@ -1,15 +1,9 @@
-// Builder.io editor registration (insert menus + design tokens).
-// These export functions/data only — no import-time side effects.
-export * from './builder-registry';
-export * from './builder-design-tokens';
-
-// Client-only entry point that registers everything for the Builder editor.
-export { registerBuilderEditor } from './registerBuilderEditor';
-
-// New modular registration system
+// Builder.io editor-configuration defaults (insert menus + design tokens).
+// Functions/data only — no import-time side effects. Apps compose these into
+// their own app-layer registry and call register(...) on the client.
 export * from './registration';
 
-// Registry exports
+// Registry exports (per-category component arrays + combined customComponents).
 export * from './registry';
 
 // Component exports

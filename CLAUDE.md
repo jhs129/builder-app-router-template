@@ -109,9 +109,25 @@ This is a Turborepo monorepo with a Next.js 16 **App Router** application built 
 - `components/seo/` - SEO and schema markup components
 - `components/common/` - Common components like ThemeProvider
 
+**Component Pattern (authoritative):**
+- Every component — registered or not — is **self-contained in its own folder**:
+  `components/{category}/{Name}/` with `index.tsx` (component + `Props`),
+  `{Name}.builder.registration.tsx` (only if registered with Builder.io), and a co-located
+  `{Name}.stories.tsx`.
+- See **`packages/components/COMPONENT_PATTERN.md`** for the full pattern, contracts, and a
+  new-component checklist. Use the `/new-component` command to scaffold it.
+
 **Registration Pattern:**
-- `packages/components/registry/` - Builder.io component registrations organized by category
-- `apps/storybook/stories/` - Storybook stories mirroring component structure
+- Each registered component owns its `{Name}.builder.registration.tsx`, which always exports
+  `registration: RegisteredComponent[]`.
+- `packages/components/registry/{category}.ts` are thin **barrels** that concatenate each
+  component's `registration`; `registry/index.ts` combines them into `customComponents`.
+- Shared, pre-widened input bundles live in `packages/components/registry/shared.ts` (the
+  single cast site) — import `themeableInputs`, `withImage()`, etc. from there.
+- The **app layer** (`apps/app-0/registry/`) owns the final component list, insert menus, and
+  design tokens; the package only provides defaults.
+- Stories are **co-located** with each component (not under `apps/storybook/stories/`); the
+  Storybook glob already picks them up.
 
 **Types System (`packages/types/`):**
 - `cms/` - CMS content type definitions
@@ -135,12 +151,16 @@ This project uses the Gen 2 React SDK (`@builder.io/sdk-react`), which is built 
 - The model and a sample rule are provisioned by `scripts/seed-builder.mjs` (`pnpm --filter app-0 init:builder`).
 - Changes take effect on the next deploy. For request-time redirects (very large rule sets or per-domain logic), move to a `proxy.ts`/middleware approach reading a generated JSON file.
 
-**Component Registration Process:**
-1. Create component in appropriate `packages/components/components/` subdirectory
-2. Register component in corresponding `packages/components/registry/` file
-3. Add component to relevant insert menu in `packages/components/builder-registry.ts`
-4. Create Storybook story in `apps/storybook/stories/` matching component path
-5. Use `NEXT_DEFAULT_COMPONENT_IMAGE` environment variable for component images
+**Component Registration Process** (full detail in `packages/components/COMPONENT_PATTERN.md`):
+1. Create the component folder `packages/components/components/{category}/{Name}/index.tsx`
+   (component + `Props`, named + default export)
+2. If registered: add `{Name}.builder.registration.tsx` exporting
+   `registration: RegisteredComponent[]`, using `withImage()` and shared input bundles from
+   `registry/shared.ts`
+3. If registered: spread its `registration` into the `registry/{category}.ts` barrel, and add
+   the component `name` to the matching group in `registration/insert-menus.ts`
+4. Add a co-located `{Name}.stories.tsx` and export the folder from `packages/components/index.ts`
+5. `withImage()` reads the `NEXT_DEFAULT_COMPONENT_IMAGE` env var for the editor thumbnail
 
 **Insert Menus Structure:**
 - Navigation - Header/Footer components
@@ -174,9 +194,12 @@ This project uses the Gen 2 React SDK (`@builder.io/sdk-react`), which is built 
 - Register in correct insert menu category
 
 **Storybook Requirements:**
-- Create story for every new component in `apps/storybook/stories/`
+- Create a `{Name}.stories.tsx` **co-located in the component folder** (not under
+  `apps/storybook/stories/`)
+- Import the primary component from `./index` and `Meta`/`StoryObj` from
+  `@storybook/nextjs-vite`; import sibling components by relative path, never from
+  `@repo/components` (self-import breaks the Storybook build)
 - Update stories when component interfaces change
-- Place stories in path matching component location
 
 **Styling Requirements:**
 - Use Tailwind CSS classes from configured design tokens
@@ -192,12 +215,15 @@ This project uses the Gen 2 React SDK (`@builder.io/sdk-react`), which is built 
 
 ### Development Workflow
 
-1. **Component Creation:** Build in appropriate `packages/components/components/` subfolder with TypeScript interfaces
+1. **Component Creation:** Build a self-contained folder
+   `packages/components/components/{category}/{Name}/index.tsx` with TypeScript interfaces
+   (see `packages/components/COMPONENT_PATTERN.md`)
 2. **Type Definition:** Add types to `packages/types/` if needed
-3. **Registration:** Add Builder.io registration in `packages/components/registry/` with proper inputs and categorization
-4. **Documentation:** Create Storybook story in `apps/storybook/stories/` demonstrating component usage
+3. **Registration (if registered):** Add `{Name}.builder.registration.tsx`, wire it into the
+   `registry/{category}.ts` barrel, and add the component to an insert menu
+4. **Documentation:** Add a co-located `{Name}.stories.tsx` demonstrating component usage
 5. **Integration:** Test in Builder.io editor and verify theme compatibility
-6. **Build Verification:** Run `pnpm build` and `pnpm lint` to ensure no errors
+6. **Build Verification:** Run `pnpm build`, `pnpm lint`, and `pnpm build:storybook` — all green
 
 ## Claude Permissions
 

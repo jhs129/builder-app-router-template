@@ -60,16 +60,18 @@ Teaching note: *`next/image` automatically optimizes images: lazy loading, moder
 
 Run:
 ```bash
-find packages/components/components -name "*.tsx" | xargs wc -l | sort -rn | head -20
-find packages/components/components -name "index.tsx" | head -20
-ls apps/storybook/stories/
+find packages/components/components -name "*.tsx" -not -name "*.stories.tsx" -not -name "*.builder.registration.tsx" | xargs wc -l | sort -rn | head -20
+# Component impls should live in folders, not as flat files at the category root
+find packages/components/components -maxdepth 2 -name "*.tsx" -not -path "*/*/*"
+# Every component folder should carry a co-located story
+find packages/components/components -mindepth 2 -name "index.tsx" | sed 's#/index.tsx##' | while read d; do ls "$d"/*.stories.* >/dev/null 2>&1 || echo "MISSING STORY: $d"; done
 ```
 
-Also read the CLAUDE.md rule: "If a component needs sub components and helper methods and is more than 100 lines of code, please split it into multiple files in a directory of the component name."
+Also read `packages/components/COMPONENT_PATTERN.md` (the authoritative pattern) and the CLAUDE.md rule: "If a component needs sub components and helper methods and is more than 100 lines of code, please split it into multiple files in a directory of the component name."
 
-Look for: Are any component files over 100 lines that haven't been split? Do split components follow the `packages/components/components/[Name]/index.tsx` pattern? Are Props interfaces defined simply (no `Omit`, `NonNullable` complexity)? Are there components missing their corresponding Storybook story?
+Look for: Is every component self-contained in its own folder (`components/{category}/{Name}/index.tsx`) rather than a flat file at the category root? Is the primary component + its `Props` interface in `index.tsx`, with sub-components/helpers split into sibling files when over ~100 lines? Are Props interfaces defined simply (no `Omit`, `NonNullable` complexity)? Does every component folder have a **co-located** `{Name}.stories.tsx` (stories should no longer live under `apps/storybook/stories/`)?
 
-Teaching note: *Splitting large components into a directory with `index.tsx` keeps each file focused and testable. Co-locating sub-components and helpers in the same directory makes the relationship explicit without polluting shared namespaces. Simple interface definitions (no `Omit`/`NonNullable`) are easier to read and less fragile to refactor.*
+Teaching note: *Each component lives in its own folder (`index.tsx` + optional `{Name}.builder.registration.tsx` + co-located `{Name}.stories.tsx`) so it can be added or removed by touching one folder. Keeping the primary component + `Props` in `index.tsx` and splitting helpers into siblings keeps each file focused. Co-locating the story removes the drift that came from mirroring the tree under `apps/storybook/stories/`. Simple interface definitions (no `Omit`/`NonNullable`) are easier to read and less fragile to refactor.*
 
 ---
 
@@ -77,15 +79,23 @@ Teaching note: *Splitting large components into a directory with `index.tsx` kee
 
 Run:
 ```bash
-cat packages/components/builder-registry.ts
+# Per-component registrations co-located with their implementation
+find packages/components/components -name "*.builder.registration.tsx"
+# Category barrels that concatenate each component's registration
 ls packages/components/registry/
-grep -rn "Builder.registerComponent\|withChildren" packages/components/registry/ --include="*.ts"
-grep -rn "placehold.co" packages/components/registry/ --include="*.ts"
+cat packages/components/registry/index.ts
+# Package default insert menus + the app's composition layer (app owns the final choices)
+cat packages/components/registration/insert-menus.ts
+ls apps/app-0/registry/
+grep -rn "withImage" packages/components/components --include="*.builder.registration.tsx" | head
+grep -rn "placehold.co" packages/components/components --include="*.tsx"
 ```
 
-Look for: Is every component in `packages/components/components/` registered in the appropriate `packages/components/registry/` file? Is each registered component listed in the correct `insertMenu` in `packages/components/builder-registry.ts`? Do all registrations include the standard image using `https://cdn.builder.io/api/v1/image/assets%2Faa26d0ed43ef421da301a1603f38faeb%2F4f97f24502864d2b8a8d414115cd5b9f`? Do default image props use `placehold.co` with `.png` extension?
+Also read `packages/components/COMPONENT_PATTERN.md` for the canonical registration contract.
 
-Teaching note: *Builder.io registration connects components to the visual editor. Missing registrations mean content editors can't use the component. The `insertMenu` groups components logically so editors can find them. Default placehold.co images must use `.png` extension to avoid format issues. The shared registration image gives all components a consistent appearance in the editor panel.*
+Look for: Does every **registered** component own a `{Name}.builder.registration.tsx` beside its `index.tsx`, exporting `registration: RegisteredComponent[]` (always an array)? Is each registration spread into the matching `registry/{category}.ts` barrel (which `registry/index.ts` combines into `customComponents`)? Is each registered component's `name` listed in the correct group in `packages/components/registration/insert-menus.ts`? Do registrations use the shared `withImage()` helper (reading `NEXT_DEFAULT_COMPONENT_IMAGE`) rather than hardcoding a thumbnail URL, and import shared input bundles from `registry/shared.ts` instead of re-casting inputs? Do default image props use `placehold.co` with a `.png` extension? Does the app layer (`apps/app-0/registry/`) own the final component list / insert menus / design tokens?
+
+Teaching note: *Builder.io registration connects components to the visual editor. In this template each registered component owns its `{Name}.builder.registration.tsx` (contract: always export `registration: RegisteredComponent[]`), thin `registry/{category}.ts` barrels concatenate them, and the **app layer** composes the final `customComponents`, insert menus, and design tokens — so the shared package only provides defaults. Missing registrations or insert-menu entries mean content editors can't find/use the component. `withImage()` centralizes the editor thumbnail so it isn't hardcoded per component, and `registry/shared.ts` is the single place the input `as`-cast lives. Default placehold.co images must use `.png` to avoid format issues.*
 
 ---
 
