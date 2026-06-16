@@ -1,5 +1,5 @@
-import type { Meta, StoryObj } from "@storybook/nextjs";
-import { Alert } from "@repo/components";
+import type { Meta, StoryObj } from "@storybook/nextjs-vite";
+import { Alert } from "./index";
 
 const meta = {
   title: "UI/Alert",

@@ -1,6 +1,6 @@
 import { FC } from "react";
 import { Themeable } from "@repo/types";
-import { ThemeProvider } from "../common/ThemeProvider";
+import { ThemeProvider } from "../../common/ThemeProvider";
 
 interface ButtonProps extends Themeable {
   label: string;

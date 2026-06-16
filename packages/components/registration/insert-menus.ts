@@ -15,6 +15,7 @@ export const INSERT_MENUS = {
     name: "Navigation",
     items: [
       { name: "Header" },
+      { name: "CenterLogoHeader" },
       { name: "Footer" },
       { name: "VerticalNavigation" },
     ],
@@ -57,14 +58,9 @@ export const INSERT_MENUS = {
     ],
   } as InsertMenuConfig,
 
-  seo: {
-    name: "SEO",
-    items: [
-      { name: "SchemaArticle" },
-      { name: "SchemaOrganization" },
-      { name: "SchemaWebsite" },
-    ],
-  } as InsertMenuConfig,
+  // Note: there is intentionally no SEO insert menu. The only registered SEO
+  // component (EventSchemaData) is `hideFromInsertMenu: true` and bound via
+  // page state, so a visible menu would only ever list dead entries.
 } as const;
 
 export type InsertMenuKey = keyof typeof INSERT_MENUS;

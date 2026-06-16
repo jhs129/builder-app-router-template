@@ -1,5 +1,5 @@
-import type { Meta, StoryObj } from '@storybook/nextjs';
-import { DesignKitOverview } from '@repo/components';
+import type { Meta, StoryObj } from '@storybook/nextjs-vite';
+import { DesignKitOverview } from './index';
 
 const meta = {
   title: 'UI/DesignKitOverview',

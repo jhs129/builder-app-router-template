@@ -1,5 +1,5 @@
-import type { Meta, StoryObj } from '@storybook/nextjs';
-import { Button } from '@repo/components';
+import type { Meta, StoryObj } from '@storybook/nextjs-vite';
+import { Button } from './index';
 
 const meta = {
   title: 'UI/Button',

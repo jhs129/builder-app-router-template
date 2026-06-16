@@ -3,10 +3,10 @@
 import { FC, useState } from "react";
 import Image from "next/image";
 import { Themeable, Theme, standardThemes } from "@repo/types";
-import Button from "./Button";
-import Banner100 from "../layout/Banner100";
-import { ThemeProvider } from "../common/ThemeProvider";
-import tailwindTheme from "../../tailwind-theme.json";
+import Button from "../Button";
+import Banner100 from "../../layout/Banner100";
+import { ThemeProvider } from "../../common/ThemeProvider";
+import tailwindTheme from "../../../tailwind-theme.json";
 
 interface DesignKitOverviewProps extends Themeable {
   className?: string;

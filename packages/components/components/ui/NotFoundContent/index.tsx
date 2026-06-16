@@ -2,7 +2,7 @@
 
 import React, { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
-import Button from "./Button";
+import Button from "../Button";
 
 interface NotFoundContentProps {
   className?: string;

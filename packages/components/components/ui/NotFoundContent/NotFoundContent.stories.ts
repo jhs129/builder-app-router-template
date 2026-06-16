@@ -1,5 +1,5 @@
-import type { Meta, StoryObj } from '@storybook/nextjs';
-import { NotFoundContent } from '@repo/components';
+import type { Meta, StoryObj } from '@storybook/nextjs-vite';
+import { NotFoundContent } from './index';
 
 const meta = {
   title: 'UI/NotFoundContent',

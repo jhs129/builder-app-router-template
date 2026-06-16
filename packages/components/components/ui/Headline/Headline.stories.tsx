@@ -1,5 +1,5 @@
-import type { Meta, StoryObj } from '@storybook/react';
-import { Headline } from '@repo/components';
+import type { Meta, StoryObj } from '@storybook/nextjs-vite';
+import { Headline } from './index';
 
 const meta: Meta<typeof Headline> = {
   title: 'UI/Headline',
