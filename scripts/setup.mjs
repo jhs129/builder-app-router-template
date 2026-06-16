@@ -147,6 +147,36 @@ function isValidAppName(name) {
   return /^[a-z][a-z0-9-]*$/.test(name);
 }
 
+// --- Write .claude/project-config.md from collected integration values ---
+function writeProjectConfig({ jira, vercelProject }) {
+  const path = join(ROOT, ".claude", "project-config.md");
+  const content = `# Project Config (read by .claude/commands/*)
+
+This file holds the per-project values the Claude Code commands need. It is
+populated by \`pnpm setup\`. You can also edit it by hand.
+
+## Jira
+- Configured: ${jira ? "yes" : "no"}
+- Project key: ${jira ? jira.projectKey : ""}
+- Cloud ID: ${jira ? jira.cloudId : ""}
+- Base URL: ${jira ? jira.baseUrl : ""}
+
+## Vercel
+- Project name: ${vercelProject || ""}
+`;
+  writeFileSync(path, content);
+  return path;
+}
+
+// --- Read an existing project-config.md value for prompt defaults ---
+function readConfigValue(label) {
+  const path = join(ROOT, ".claude", "project-config.md");
+  if (!existsSync(path)) return "";
+  const content = readFileSync(path, "utf8");
+  const match = content.match(new RegExp(`^- ${label}:\\s*(.*)$`, "m"));
+  return match ? match[1].trim() : "";
+}
+
 async function main() {
   console.log("\nBuilder.io App Router template — setup\n");
 
@@ -181,6 +211,24 @@ async function main() {
   envContent = upsertEnv(envContent, "BUILDER_PRIVATE_KEY", privateKey);
   writeFileSync(envPath, envContent);
   console.log(`\n✓ Wrote keys to apps/${app.dir}/.env.local`);
+
+  // --- 1b. Claude Code command integrations (Jira + Vercel) ---
+  console.log("\nClaude Code command config (.claude/project-config.md):");
+  let jira = null;
+  if (await askYesNo("\nConfigure Jira integration for the Claude Code commands?")) {
+    const projectKey = (await askWithDefault("  Jira project key (e.g. ACME)", readConfigValue("Project key"))).toUpperCase();
+    const cloudId = await askWithDefault("  Atlassian cloud ID", readConfigValue("Cloud ID"));
+    const defaultBase = readConfigValue("Base URL") ||
+      (projectKey ? `https://${projectKey.toLowerCase()}.atlassian.net/browse/` : "");
+    const baseUrl = await askWithDefault("  Jira base URL", defaultBase);
+    jira = { projectKey, cloudId, baseUrl };
+  }
+  const vercelProject = await askWithDefault(
+    "Vercel project name (for preview-deployment detection)",
+    readConfigValue("Project name") || app.dir
+  );
+  const cfgPath = writeProjectConfig({ jira, vercelProject });
+  console.log(`✓ Wrote ${cfgPath.replace(ROOT + "/", "")}`);
 
   // --- 2. Optional rename ---
   let newName = null;
@@ -228,6 +276,7 @@ async function main() {
       join(APPS_DIR, "storybook", "postcss.config.mjs"),
       join(app.path, "package.json"),
       join(app.path, "scripts", "seed-builder.mjs"),
+      join(ROOT, ".claude", "project-config.md"),
     ];
     for (const file of filesToUpdate) replaceInFile(file, app.dir, newName);
     renameSync(app.path, join(APPS_DIR, newName));
