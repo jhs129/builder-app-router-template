@@ -2,6 +2,8 @@
 
 This file provides guidance to Claude Code (claude.ai/code) when working with code in this repository.
 
+> **Read first:** [`docs/DESIGN_PATTERNS.md`](docs/DESIGN_PATTERNS.md) is the authoritative, explicit guide to the design patterns and standards used here — theming, URL redirects, the Next 16 proxy/i18n, Vercel MIU optimization, linting, the component/registration pattern, and core rules. Consult it before making changes.
+
 > **Package manager:** This repo uses **pnpm** (`pnpm@9.15.4`). Always use `pnpm`, never `npm` or `yarn`.
 
 ## Development Commands
