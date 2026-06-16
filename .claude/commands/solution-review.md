@@ -79,15 +79,23 @@ Teaching note: *Each component lives in its own folder (`index.tsx` + optional `
 
 Run:
 ```bash
-cat packages/components/builder-registry.ts
+# Per-component registrations co-located with their implementation
+find packages/components/components -name "*.builder.registration.tsx"
+# Category barrels that concatenate each component's registration
 ls packages/components/registry/
-grep -rn "Builder.registerComponent\|withChildren" packages/components/registry/ --include="*.ts"
-grep -rn "placehold.co" packages/components/registry/ --include="*.ts"
+cat packages/components/registry/index.ts
+# Package default insert menus + the app's composition layer (app owns the final choices)
+cat packages/components/registration/insert-menus.ts
+ls apps/app-0/registry/
+grep -rn "withImage" packages/components/components --include="*.builder.registration.tsx" | head
+grep -rn "placehold.co" packages/components/components --include="*.tsx"
 ```
 
-Look for: Is every component in `packages/components/components/` registered in the appropriate `packages/components/registry/` file? Is each registered component listed in the correct `insertMenu` in `packages/components/builder-registry.ts`? Do all registrations include the standard image using `https://cdn.builder.io/api/v1/image/assets%2Faa26d0ed43ef421da301a1603f38faeb%2F4f97f24502864d2b8a8d414115cd5b9f`? Do default image props use `placehold.co` with `.png` extension?
+Also read `packages/components/COMPONENT_PATTERN.md` for the canonical registration contract.
 
-Teaching note: *Builder.io registration connects components to the visual editor. Missing registrations mean content editors can't use the component. The `insertMenu` groups components logically so editors can find them. Default placehold.co images must use `.png` extension to avoid format issues. The shared registration image gives all components a consistent appearance in the editor panel.*
+Look for: Does every **registered** component own a `{Name}.builder.registration.tsx` beside its `index.tsx`, exporting `registration: RegisteredComponent[]` (always an array)? Is each registration spread into the matching `registry/{category}.ts` barrel (which `registry/index.ts` combines into `customComponents`)? Is each registered component's `name` listed in the correct group in `packages/components/registration/insert-menus.ts`? Do registrations use the shared `withImage()` helper (reading `NEXT_DEFAULT_COMPONENT_IMAGE`) rather than hardcoding a thumbnail URL, and import shared input bundles from `registry/shared.ts` instead of re-casting inputs? Do default image props use `placehold.co` with a `.png` extension? Does the app layer (`apps/app-0/registry/`) own the final component list / insert menus / design tokens?
+
+Teaching note: *Builder.io registration connects components to the visual editor. In this template each registered component owns its `{Name}.builder.registration.tsx` (contract: always export `registration: RegisteredComponent[]`), thin `registry/{category}.ts` barrels concatenate them, and the **app layer** composes the final `customComponents`, insert menus, and design tokens — so the shared package only provides defaults. Missing registrations or insert-menu entries mean content editors can't find/use the component. `withImage()` centralizes the editor thumbnail so it isn't hardcoded per component, and `registry/shared.ts` is the single place the input `as`-cast lives. Default placehold.co images must use `.png` to avoid format issues.*
 
 ---
 
