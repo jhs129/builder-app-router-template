@@ -1,5 +1,5 @@
-import type { Meta, StoryObj } from "@storybook/nextjs";
-import { CenterLogoHeader } from "@repo/components";
+import type { Meta, StoryObj } from "@storybook/nextjs-vite";
+import { CenterLogoHeader } from "./index";
 
 const meta = {
   title: "Navigation/CenterLogoHeader",

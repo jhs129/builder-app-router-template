@@ -1,5 +1,5 @@
-import type { Meta, StoryObj } from '@storybook/nextjs';
-import { OrganizationSchemaData } from '@repo/components';
+import type { Meta, StoryObj } from '@storybook/nextjs-vite';
+import { OrganizationSchemaData } from './index';
 
 const meta = {
   title: 'SEO/OrganizationSchemaData',

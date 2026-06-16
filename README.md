@@ -108,10 +108,15 @@ See [`CLAUDE.md`](./CLAUDE.md) for detailed architecture and component-developme
 
 This template ships a suite of Claude Code slash commands under
 `.claude/commands/` (PR creation, PR feedback, Jira grooming and dev pipeline,
-solution review, build fixes). They read per-project values — Jira project key,
-cloud ID, base URL, and Vercel project name — from `.claude/project-config.md`,
-which `pnpm setup` populates. If you skip Jira during setup, the Jira-aware
-commands simply omit their Jira steps.
+solution review, build fixes, and component scaffolding). They read per-project
+values — Jira project key, cloud ID, base URL, and Vercel project name — from
+`.claude/project-config.md`, which `pnpm setup` populates. If you skip Jira
+during setup, the Jira-aware commands simply omit their Jira steps.
+
+Notably, **`/new-component`** scaffolds a new component following the
+self-contained-folder pattern in
+[`packages/components/COMPONENT_PATTERN.md`](./packages/components/COMPONENT_PATTERN.md),
+and asks whether it should be registered with Builder.io.
 
 ## Deploy on Vercel
 

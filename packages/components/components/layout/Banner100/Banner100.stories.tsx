@@ -1,5 +1,5 @@
-import type { Meta, StoryObj } from "@storybook/nextjs";
-import { Banner100 } from "@repo/components";
+import type { Meta, StoryObj } from "@storybook/nextjs-vite";
+import { Banner100 } from "./index";
 
 const meta: Meta<typeof Banner100> = {
   title: "Layout/Banner100",

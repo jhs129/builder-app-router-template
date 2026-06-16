@@ -1,5 +1,5 @@
-import type { Meta, StoryObj } from '@storybook/nextjs';
-import { ThemeProvider } from '@repo/components';
+import type { Meta, StoryObj } from '@storybook/nextjs-vite';
+import { ThemeProvider } from './index';
 
 const meta = {
   title: 'Common/ThemeProvider',

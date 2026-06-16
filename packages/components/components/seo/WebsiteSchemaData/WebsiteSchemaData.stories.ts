@@ -1,5 +1,5 @@
-import type { Meta, StoryObj } from "@storybook/nextjs";
-import { WebsiteSchemaData } from "@repo/components";
+import type { Meta, StoryObj } from "@storybook/nextjs-vite";
+import { WebsiteSchemaData } from "./index";
 import React from "react";
 
 // Custom decorator to display the JSON-LD output in a readable format

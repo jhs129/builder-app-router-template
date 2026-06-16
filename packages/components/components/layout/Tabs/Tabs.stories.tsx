@@ -1,5 +1,5 @@
-import type { Meta, StoryObj } from "@storybook/nextjs";
-import { Tabs } from "@repo/components";
+import type { Meta, StoryObj } from "@storybook/nextjs-vite";
+import { Tabs } from "./index";
 import { standardThemes } from "@repo/types/design-kit/themeable";
 
 const meta: Meta<typeof Tabs> = {

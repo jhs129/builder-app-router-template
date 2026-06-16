@@ -7,7 +7,7 @@ import {
 } from "@builder.io/sdk-react";
 import { Themeable, Alignable, TextAlignments, Opaque, Stylable } from "@repo/types";
 import { ReactNode, useMemo } from "react";
-import { ThemeProvider } from "../common/ThemeProvider";
+import { ThemeProvider } from "../../common/ThemeProvider";
 
 interface Banner100Props extends Themeable, Alignable, Opaque, Stylable {
   content?: { blocks: BuilderBlock[] };

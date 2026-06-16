@@ -1,5 +1,5 @@
-import type { Meta, StoryObj } from "@storybook/nextjs";
-import { DefaultHeader as DefaultGlobalHeader } from "@repo/components";
+import type { Meta, StoryObj } from "@storybook/nextjs-vite";
+import { DefaultHeader as DefaultGlobalHeader } from "./index";
 
 const meta = {
   title: "Navigation/DefaultGlobalHeader",

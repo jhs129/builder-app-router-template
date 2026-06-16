@@ -4,9 +4,9 @@ import {
   alignmentClasses,
   childrenAlignmentClasses,
 } from "@repo/types/design-kit/alignable";
-import { ThemeProvider } from "../common/ThemeProvider";
-import { Headline } from "../ui/Headline";
-import { hasMeaningfulContent } from "../../utils/content";
+import { ThemeProvider } from "../../common/ThemeProvider";
+import { Headline } from "../../ui/Headline";
+import { hasMeaningfulContent } from "../../../utils/content";
 
 interface TileContentProps
   extends Themeable,

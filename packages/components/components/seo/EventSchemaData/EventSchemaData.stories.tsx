@@ -1,5 +1,5 @@
-import type { Meta, StoryObj } from "@storybook/nextjs";
-import { EventSchemaData } from "@repo/components";
+import type { Meta, StoryObj } from "@storybook/nextjs-vite";
+import { EventSchemaData } from "./index";
 
 const meta: Meta<typeof EventSchemaData> = {
   title: "SEO/EventSchemaData",

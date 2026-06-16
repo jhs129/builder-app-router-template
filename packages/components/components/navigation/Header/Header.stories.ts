@@ -1,5 +1,5 @@
-import type { Meta, StoryObj } from "@storybook/nextjs";
-import { Header } from "@repo/components";
+import type { Meta, StoryObj } from "@storybook/nextjs-vite";
+import { Header } from "./index";
 
 const meta = {
   title: "Navigation/Header",

@@ -1,8 +1,8 @@
 import { FC } from "react";
 import Image from "next/image";
 import { Themeable, Alignable, TextAlignments, Heroic } from "@repo/types";
-import Button from "../ui/Button";
-import { ThemeProvider } from "../common/ThemeProvider";
+import Button from "../../ui/Button";
+import { ThemeProvider } from "../../common/ThemeProvider";
 
 interface TileImageProps extends Themeable, Alignable, Heroic {
   image: string;

@@ -3,7 +3,7 @@
 import { Themeable, Alignable, TextAlignments, Stylable } from "@repo/types";
 import Slider from "react-slick";
 import React, { ReactNode } from "react";
-import { ThemeProvider } from "../common/ThemeProvider";
+import { ThemeProvider } from "../../common/ThemeProvider";
 import "slick-carousel/slick/slick.css";
 import "slick-carousel/slick/slick-theme.css";
 

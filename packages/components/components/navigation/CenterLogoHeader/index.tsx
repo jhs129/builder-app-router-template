@@ -4,7 +4,7 @@ import Image from "next/image";
 import Link from "next/link";
 import { useState, useRef, useEffect } from "react";
 import { Navigation, Level1Item, Level2Item } from "@repo/types";
-import { useSiteContext } from "../../contexts/SiteContextProvider";
+import { useSiteContext } from "../../../contexts/SiteContextProvider";
 
 interface CenterLogoHeaderProps {
   logo?: string;

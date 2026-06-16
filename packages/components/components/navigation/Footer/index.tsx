@@ -4,7 +4,7 @@ import Image from "next/image";
 import Link from "next/link";
 import { Navigation, SocialNetwork, Themeable } from "@repo/types";
 import { socialNetworkIconStyles, SocialNetworkName } from "@repo/types/social";
-import { useSiteContext } from "../../contexts/SiteContextProvider";
+import { useSiteContext } from "../../../contexts/SiteContextProvider";
 
 interface FooterProps extends Themeable {
   navigation?: Navigation;

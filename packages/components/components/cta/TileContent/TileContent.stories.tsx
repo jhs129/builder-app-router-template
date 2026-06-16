@@ -1,5 +1,6 @@
-import type { Meta, StoryObj } from '@storybook/nextjs';
-import { TileContent, Button } from "@repo/components";
+import type { Meta, StoryObj } from '@storybook/nextjs-vite';
+import { TileContent } from "./index";
+import { Button } from "../../ui/Button";
 
 const meta: Meta<typeof TileContent> = {
   title: "CTA/TileContent",

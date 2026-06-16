@@ -1,5 +1,5 @@
-import type { Meta, StoryObj } from '@storybook/nextjs';
-import { DefaultFooter } from '@repo/components';
+import type { Meta, StoryObj } from '@storybook/nextjs-vite';
+import { DefaultFooter } from './index';
 
 const meta = {
   title: 'Navigation/DefaultFooter',

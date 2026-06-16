@@ -1,8 +1,8 @@
 import { FC } from "react";
 import Image from "next/image";
 import { Themeable, Alignable, TextAlignments } from "@repo/types";
-import Button from "../ui/Button";
-import { ThemeProvider } from "../common/ThemeProvider";
+import Button from "../../ui/Button";
+import { ThemeProvider } from "../../common/ThemeProvider";
 
 interface CardImageCTAProps extends Themeable, Alignable {
   image: string;

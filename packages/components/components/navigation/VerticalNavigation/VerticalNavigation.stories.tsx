@@ -1,7 +1,7 @@
-import type { Meta, StoryObj } from '@storybook/nextjs';
+import type { Meta, StoryObj } from '@storybook/nextjs-vite';
 import React from 'react';
-import { VerticalNavigation } from '@repo/components';
-import { TileContent } from '@repo/components';
+import { VerticalNavigation } from './index';
+import { TileContent } from '../../cta/TileContent';
 import { textAlignments } from '@repo/types';
 
 const meta = {

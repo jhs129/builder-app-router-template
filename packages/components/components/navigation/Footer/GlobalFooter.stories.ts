@@ -1,5 +1,5 @@
-import type { Meta, StoryObj } from "@storybook/nextjs";
-import { Footer as GlobalFooter } from "@repo/components";
+import type { Meta, StoryObj } from "@storybook/nextjs-vite";
+import { Footer as GlobalFooter } from "./index";
 
 const meta = {
   title: "Navigation/GlobalFooter",

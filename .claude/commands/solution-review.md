@@ -60,16 +60,18 @@ Teaching note: *`next/image` automatically optimizes images: lazy loading, moder
 
 Run:
 ```bash
-find packages/components/components -name "*.tsx" | xargs wc -l | sort -rn | head -20
-find packages/components/components -name "index.tsx" | head -20
-ls apps/storybook/stories/
+find packages/components/components -name "*.tsx" -not -name "*.stories.tsx" -not -name "*.builder.registration.tsx" | xargs wc -l | sort -rn | head -20
+# Component impls should live in folders, not as flat files at the category root
+find packages/components/components -maxdepth 2 -name "*.tsx" -not -path "*/*/*"
+# Every component folder should carry a co-located story
+find packages/components/components -mindepth 2 -name "index.tsx" | sed 's#/index.tsx##' | while read d; do ls "$d"/*.stories.* >/dev/null 2>&1 || echo "MISSING STORY: $d"; done
 ```
 
-Also read the CLAUDE.md rule: "If a component needs sub components and helper methods and is more than 100 lines of code, please split it into multiple files in a directory of the component name."
+Also read `packages/components/COMPONENT_PATTERN.md` (the authoritative pattern) and the CLAUDE.md rule: "If a component needs sub components and helper methods and is more than 100 lines of code, please split it into multiple files in a directory of the component name."
 
-Look for: Are any component files over 100 lines that haven't been split? Do split components follow the `packages/components/components/[Name]/index.tsx` pattern? Are Props interfaces defined simply (no `Omit`, `NonNullable` complexity)? Are there components missing their corresponding Storybook story?
+Look for: Is every component self-contained in its own folder (`components/{category}/{Name}/index.tsx`) rather than a flat file at the category root? Is the primary component + its `Props` interface in `index.tsx`, with sub-components/helpers split into sibling files when over ~100 lines? Are Props interfaces defined simply (no `Omit`, `NonNullable` complexity)? Does every component folder have a **co-located** `{Name}.stories.tsx` (stories should no longer live under `apps/storybook/stories/`)?
 
-Teaching note: *Splitting large components into a directory with `index.tsx` keeps each file focused and testable. Co-locating sub-components and helpers in the same directory makes the relationship explicit without polluting shared namespaces. Simple interface definitions (no `Omit`/`NonNullable`) are easier to read and less fragile to refactor.*
+Teaching note: *Each component lives in its own folder (`index.tsx` + optional `{Name}.builder.registration.tsx` + co-located `{Name}.stories.tsx`) so it can be added or removed by touching one folder. Keeping the primary component + `Props` in `index.tsx` and splitting helpers into siblings keeps each file focused. Co-locating the story removes the drift that came from mirroring the tree under `apps/storybook/stories/`. Simple interface definitions (no `Omit`/`NonNullable`) are easier to read and less fragile to refactor.*
 
 ---
 

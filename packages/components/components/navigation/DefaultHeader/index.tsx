@@ -1,8 +1,8 @@
 "use client";
 
-import Header from "./Header";
+import Header from "../Header";
 import { Navigation } from "@repo/types";
-import { useSiteContext } from "../../contexts/SiteContextProvider";
+import { useSiteContext } from "../../../contexts/SiteContextProvider";
 
 const defaultNavigation: Navigation = {
   data: { level1: [] },

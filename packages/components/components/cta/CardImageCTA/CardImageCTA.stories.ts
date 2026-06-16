@@ -1,5 +1,5 @@
-import type { Meta, StoryObj } from "@storybook/nextjs";
-import { CardImageCTA } from "@repo/components";
+import type { Meta, StoryObj } from "@storybook/nextjs-vite";
+import { CardImageCTA } from "./index";
 
 const meta: Meta<typeof CardImageCTA> = {
   title: "CTA/CardImageCTA",

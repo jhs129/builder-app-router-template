@@ -5,7 +5,7 @@ import {
   type BuilderContextInterface,
 } from "@builder.io/sdk-react";
 import { Navigation, Themeable, Alignable, Heroic } from "@repo/types";
-import { ThemeProvider } from "../common/ThemeProvider";
+import { ThemeProvider } from "../../common/ThemeProvider";
 
 interface VerticalNavProps extends Themeable, Alignable, Heroic {
   navigation?: Navigation;

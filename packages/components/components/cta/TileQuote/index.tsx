@@ -1,6 +1,6 @@
 import { FC } from "react";
 import { Themeable, Alignable, TextAlignments, Heroic } from "@repo/types";
-import { ThemeProvider } from "../common/ThemeProvider";
+import { ThemeProvider } from "../../common/ThemeProvider";
 
 interface TileQuoteProps extends Themeable, Alignable, Heroic {
   quote: string;

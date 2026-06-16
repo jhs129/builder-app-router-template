@@ -1,8 +1,8 @@
 "use client";
 
 import React, { ReactNode } from "react";
-import { ThemeContextProvider } from "../../contexts/ThemeContext";
-import { useResolvedTheme } from "../../hooks/useTheme";
+import { ThemeContextProvider } from "../../../contexts/ThemeContext";
+import { useResolvedTheme } from "../../../hooks/useTheme";
 import { Theme } from "@repo/types";
 
 interface ThemeProviderProps {

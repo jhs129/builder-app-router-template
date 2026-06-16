@@ -1,5 +1,5 @@
-import type { Meta, StoryObj } from '@storybook/nextjs';
-import { Carousel } from '@repo/components';
+import type { Meta, StoryObj } from '@storybook/nextjs-vite';
+import { Carousel } from './index';
 
 const meta = {
   title: 'Layout/Carousel',

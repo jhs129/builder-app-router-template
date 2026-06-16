@@ -1,5 +1,5 @@
-import type { Meta, StoryObj } from "@storybook/nextjs";
-import { TileImage } from "@repo/components";
+import type { Meta, StoryObj } from "@storybook/nextjs-vite";
+import { TileImage } from "./index";
 
 const meta: Meta<typeof TileImage> = {
   title: "CTA/TileImage",
