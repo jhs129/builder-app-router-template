@@ -16,9 +16,14 @@ const preview: Preview = {
           value: '#ffffff',
         },
 
+        parchment: {
+          name: 'parchment',
+          value: '#eae4c8',
+        },
+
         dark: {
           name: 'dark',
-          value: '#1d0f34',
+          value: '#121212',
         }
       }
     },

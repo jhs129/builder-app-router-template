@@ -18,27 +18,28 @@
       "Poppins", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto,
       "Helvetica Neue", Arial, sans-serif;
 
-    /* Brand  Color Variables */
-    --primary-dark: #1d0f34;
-    --primary-light: #ffffff;
-    --secondary-light: #f5f5f5;
-    --secondary-dark: #647589;
-    --accent-purple: #6610f2;
-    --accent-green: #20c997;
-    --accent-magenta: #b31d9d;
-    --accent-cyan: #5ce1e6;
-    --accent-teal: #0dcaf0;
-    --accent-light-purple: #8c52ff;
-    --primary-cyan: #5ce1e6;
-    --primary-accent: #6610f2; /* Same as --accent-purple */
+    /* Brand Color Variables — Chameleon Collective palette */
+    --primary-dark: #121212; /* CC Black */
+    --primary-light: #ffffff; /* CC White */
+    --primary-parchment: #eae4c8; /* CC Parchment — warm cream page canvas */
+    --secondary-light: #f3f3f3; /* CC Off-White */
+    --secondary-dark: #5b5b5b; /* CC Mid-Gray */
+    --accent-purple: #ea633f; /* CC Burnt Sienna — primary accent */
+    --accent-green: #e8eb74; /* CC Straw — secondary accent */
+    --accent-magenta: #f78d1e; /* CC Orange */
+    --accent-cyan: #88e8f0; /* CC Electric Blue — tertiary accent */
+    --accent-teal: #0097a7; /* CC Teal */
+    --accent-light-purple: #ced167; /* CC Straw Dark */
+    --primary-cyan: #88e8f0; /* CC Electric Blue */
+    --primary-accent: #ea633f; /* CC Burnt Sienna (same as --accent-purple) */
 
     /* Legacy Theme Colors */
     --theme-light-heading: var(--accent-purple);
     --theme-dark-heading: var(--primary-light);
     --theme-accent-heading: var(--primary-light);
 
-    /* Default Theme-aware Properties (Light Theme as default) */
-    --theme-bg: var(--primary-light);
+    /* Default Theme-aware Properties — Parchment canvas (CC default page bg) */
+    --theme-bg: var(--primary-parchment);
     --theme-text: var(--primary-dark);
     --theme-heading: var(--primary-dark);
     --theme-heading-alt: var(--accent-purple);
@@ -367,140 +368,140 @@
 /* Theme-specific carousel navigation styles */
 .theme-light .carousel-wrapper .slick-prev,
 .theme-light .carousel-wrapper .slick-next {
-  background: rgb(29, 15, 52);
+  background: rgb(18, 18, 18);
   color: rgb(255, 255, 255);
-  border-color: rgb(29, 15, 52);
+  border-color: rgb(18, 18, 18);
 }
 
 .theme-light .carousel-wrapper .slick-prev:hover,
 .theme-light .carousel-wrapper .slick-next:hover {
-  background: rgb(245, 245, 245);
-  color: rgb(29, 15, 52);
+  background: rgb(243, 243, 243);
+  color: rgb(18, 18, 18);
 }
 
 .theme-light .carousel-wrapper .slick-dots li button {
-  background: rgba(29, 15, 52, 0.3);
+  background: rgba(18, 18, 18, 0.3);
 }
 
 .theme-light .carousel-wrapper .slick-dots li button:hover {
-  background: rgba(29, 15, 52, 0.6);
+  background: rgba(18, 18, 18, 0.6);
 }
 
 .theme-light .carousel-wrapper .slick-dots li.slick-active button {
-  background: rgb(29, 15, 52);
+  background: rgb(18, 18, 18);
 }
 
 .theme-dark .carousel-wrapper .slick-prev,
 .theme-dark .carousel-wrapper .slick-next {
-  background: rgb(245, 245, 245);
-  color: rgb(29, 15, 52);
-  border-color: rgb(245, 245, 245);
+  background: rgb(243, 243, 243);
+  color: rgb(18, 18, 18);
+  border-color: rgb(243, 243, 243);
 }
 
 .theme-dark .carousel-wrapper .slick-prev:hover,
 .theme-dark .carousel-wrapper .slick-next:hover {
   background: rgb(255, 255, 255);
-  color: rgb(29, 15, 52);
+  color: rgb(18, 18, 18);
 }
 
 .theme-dark .carousel-wrapper .slick-dots li button {
-  background: rgba(245, 245, 245, 0.3);
+  background: rgba(243, 243, 243, 0.3);
 }
 
 .theme-dark .carousel-wrapper .slick-dots li button:hover {
-  background: rgba(245, 245, 245, 0.6);
+  background: rgba(243, 243, 243, 0.6);
 }
 
 .theme-dark .carousel-wrapper .slick-dots li.slick-active button {
-  background: rgb(245, 245, 245);
+  background: rgb(243, 243, 243);
 }
 
 .theme-accent .carousel-wrapper .slick-prev,
 .theme-accent .carousel-wrapper .slick-next {
-  background: rgb(92, 225, 230);
+  background: rgb(136, 232, 240);
   color: rgb(255, 255, 255);
-  border-color: rgb(92, 225, 230);
+  border-color: rgb(136, 232, 240);
 }
 
 .theme-accent .carousel-wrapper .slick-prev:hover,
 .theme-accent .carousel-wrapper .slick-next:hover {
-  background: #647589;
-  color: rgb(29, 15, 52);
+  background: #5b5b5b;
+  color: rgb(18, 18, 18);
 }
 
 .theme-accent .carousel-wrapper .slick-dots li button {
-  background: rgba(92, 225, 230, 0.3);
+  background: rgba(136, 232, 240, 0.3);
 }
 
 .theme-accent .carousel-wrapper .slick-dots li button:hover {
-  background: rgba(92, 225, 230, 0.6);
+  background: rgba(136, 232, 240, 0.6);
 }
 
 .theme-accent .carousel-wrapper .slick-dots li.slick-active button {
-  background: rgb(92, 225, 230);
+  background: rgb(136, 232, 240);
 }
 
 .theme-gradient .carousel-wrapper .slick-prev,
 .theme-gradient .carousel-wrapper .slick-next {
-  background: rgb(179, 29, 157);
+  background: rgb(247, 141, 30);
   color: rgb(255, 255, 255);
-  border-color: rgb(179, 29, 157);
+  border-color: rgb(247, 141, 30);
 }
 
 .theme-gradient .carousel-wrapper .slick-prev:hover,
 .theme-gradient .carousel-wrapper .slick-next:hover {
-  background: rgb(32, 201, 151);
-  color: rgb(29, 15, 52);
+  background: rgb(232, 235, 116);
+  color: rgb(18, 18, 18);
 }
 
 .theme-gradient .carousel-wrapper .slick-dots li button {
-  background: rgba(179, 29, 157, 0.3);
+  background: rgba(247, 141, 30, 0.3);
 }
 
 .theme-gradient .carousel-wrapper .slick-dots li button:hover {
-  background: rgba(179, 29, 157, 0.6);
+  background: rgba(247, 141, 30, 0.6);
 }
 
 .theme-gradient .carousel-wrapper .slick-dots li.slick-active button {
-  background: rgb(179, 29, 157);
+  background: rgb(247, 141, 30);
 }
 
 .theme-transparent-light .carousel-wrapper .slick-prev,
 .theme-transparent-light .carousel-wrapper .slick-next {
-  background: rgb(29, 15, 52);
+  background: rgb(18, 18, 18);
   color: rgb(255, 255, 255);
-  border-color: rgb(29, 15, 52);
+  border-color: rgb(18, 18, 18);
 }
 
 .theme-transparent-light .carousel-wrapper .slick-prev:hover,
 .theme-transparent-light .carousel-wrapper .slick-next:hover {
-  background: rgb(32, 201, 151);
-  color: rgb(29, 15, 52);
+  background: rgb(232, 235, 116);
+  color: rgb(18, 18, 18);
 }
 
 .theme-transparent-light .carousel-wrapper .slick-dots li button {
-  background: rgba(29, 15, 52, 0.3);
+  background: rgba(18, 18, 18, 0.3);
 }
 
 .theme-transparent-light .carousel-wrapper .slick-dots li button:hover {
-  background: rgba(29, 15, 52, 0.6);
+  background: rgba(18, 18, 18, 0.6);
 }
 
 .theme-transparent-light .carousel-wrapper .slick-dots li.slick-active button {
-  background: rgb(29, 15, 52);
+  background: rgb(18, 18, 18);
 }
 
 .theme-transparent-dark .carousel-wrapper .slick-prev,
 .theme-transparent-dark .carousel-wrapper .slick-next {
   background: rgb(255, 255, 255);
-  color: rgb(29, 15, 52);
+  color: rgb(18, 18, 18);
   border-color: rgb(255, 255, 255);
 }
 
 .theme-transparent-dark .carousel-wrapper .slick-prev:hover,
 .theme-transparent-dark .carousel-wrapper .slick-next:hover {
-  background: rgb(32, 201, 151);
-  color: rgb(29, 15, 52);
+  background: rgb(232, 235, 116);
+  color: rgb(18, 18, 18);
 }
 
 .theme-transparent-dark .carousel-wrapper .slick-dots li button {

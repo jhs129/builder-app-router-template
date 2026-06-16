@@ -5,22 +5,23 @@ const THEME_CSS = `
 /* Theme CSS for Builder.io Preview Environment */
 /* Base theme-aware CSS custom properties */
 :root {
-  /* Brand Color Variables */
-  --primary-dark: #1d0f34;
+  /* Brand Color Variables — Chameleon Collective palette */
+  --primary-dark: #121212;
   --primary-light: #ffffff;
-  --secondary-light: #f5f5f5;
-  --secondary-dark: #647589;
-  --accent-purple: #6610f2;
-  --accent-green: #20c997;
-  --accent-magenta: #b31d9d;
-  --accent-cyan: #5ce1e6;
-  --accent-teal: #0dcaf0;
-  --accent-light-purple: #8c52ff;
-  --primary-cyan: #5ce1e6;
-  --primary-accent: #6610f2;
+  --primary-parchment: #eae4c8;
+  --secondary-light: #f3f3f3;
+  --secondary-dark: #5b5b5b;
+  --accent-purple: #ea633f;
+  --accent-green: #e8eb74;
+  --accent-magenta: #f78d1e;
+  --accent-cyan: #88e8f0;
+  --accent-teal: #0097a7;
+  --accent-light-purple: #ced167;
+  --primary-cyan: #88e8f0;
+  --primary-accent: #ea633f;
 
-  /* Default Theme-aware Properties (Light Theme as default) */
-  --theme-bg: var(--primary-light);
+  /* Default Theme-aware Properties — Parchment canvas (CC default page bg) */
+  --theme-bg: var(--primary-parchment);
   --theme-text: var(--primary-dark);
   --theme-heading: var(--primary-dark);
   --theme-heading-alt: var(--accent-purple);

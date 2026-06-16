@@ -78,8 +78,18 @@ const getColorsByCategory = (
 
 // Determine text color based on background color
 const getTextColorForBackground = (colorName: string): string => {
-  // Light colors get dark text
-  const lightColors = ["primary-light", "secondary-light"];
+  // Light backgrounds get dark text. Includes the lighter Chameleon
+  // Collective accents (parchment, straw, electric blue, orange, straw dark).
+  const lightColors = [
+    "primary-light",
+    "primary-parchment",
+    "secondary-light",
+    "secondary-accent",
+    "accent-green",
+    "accent-cyan",
+    "accent-magenta",
+    "accent-light-purple",
+  ];
 
   if (lightColors.includes(colorName)) {
     return "text-primary-dark";
