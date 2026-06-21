@@ -38,7 +38,7 @@
  *      the Admin GraphQL API has no content-write mutation, so content creation
  *      must go through the Write API. Model = GraphQL, content = REST.
  *
- * Credentials are read from apps/template-test/.env.local:
+ * Credentials are read from apps/app-0/.env.local:
  *   - BUILDER_PRIVATE_KEY          (bpk-...)  — required, for writes
  *   - NEXT_PUBLIC_BUILDER_API_KEY             — required, to check existing content
  *   - NEXT_PUBLIC_SITE_CONTEXT_NAME           — entry name the app queries by
@@ -48,6 +48,8 @@ import { GraphQLClient, gql } from "graphql-request";
 import { readFileSync } from "node:fs";
 import { fileURLToPath } from "node:url";
 import { dirname, resolve } from "node:path";
+import { createServer } from "node:net";
+import { spawn } from "node:child_process";
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
 
@@ -99,11 +101,11 @@ const referenceValue = (model, id) => ({
 });
 
 if (!PRIVATE_KEY) {
-  console.error("✗ BUILDER_PRIVATE_KEY is missing from apps/template-test/.env.local");
+  console.error("✗ BUILDER_PRIVATE_KEY is missing from apps/app-0/.env.local");
   process.exit(1);
 }
 if (!PUBLIC_KEY) {
-  console.error("✗ NEXT_PUBLIC_BUILDER_API_KEY is missing from apps/template-test/.env.local");
+  console.error("✗ NEXT_PUBLIC_BUILDER_API_KEY is missing from apps/app-0/.env.local");
   process.exit(1);
 }
 
@@ -501,117 +503,144 @@ const HOME_PAGE_BLOCKS = [
     },
   },
 
-  // --- FAQ: Accordion with template usage questions ---
+  // --- FAQ: Core:Section wrapping Accordion ---
   {
     "@type": "@builder.io/sdk:Element",
     component: {
-      name: "Accordion",
+      name: "Core:Section",
       options: {
-        theme: "light",
-        headline: "Frequently Asked Questions",
-        groups: [
-          {
-            headline: "What is this template?",
-            content: {
-              blocks: [
-                {
-                  "@type": "@builder.io/sdk:Element",
-                  component: {
-                    name: "Text",
-                    options: {
-                      text: "<p>This is a production-ready Next.js App Router starter integrated with Builder.io for visual content editing. It includes a blog system, site-context for global settings, navigation management, URL redirect rules, and a shared component library built with Tailwind CSS.</p>",
-                    },
-                  },
-                },
-              ],
-            },
-          },
-          {
-            headline: "How do I edit this page visually?",
-            content: {
-              blocks: [
-                {
-                  "@type": "@builder.io/sdk:Element",
-                  component: {
-                    name: "Text",
-                    options: {
-                      text: "<p>Open your Builder.io space and navigate to <strong>Pages</strong>. Click the <em>Home</em> entry to open it in the visual editor. From there you can drag-and-drop components, edit text inline, and publish changes without touching code.</p>",
-                    },
-                  },
-                },
-              ],
-            },
-          },
-          {
-            headline: "How do I add a new page?",
-            content: {
-              blocks: [
-                {
-                  "@type": "@builder.io/sdk:Element",
-                  component: {
-                    name: "Text",
-                    options: {
-                      text: "<p>In Builder.io, go to <strong>Pages → New Entry</strong>. Set the URL path (e.g. <code>/about</code>), add your components, and publish. The Next.js catch-all route (<code>[[...page]]</code>) automatically serves every published page entry.</p>",
-                    },
-                  },
-                },
-              ],
-            },
-          },
-          {
-            headline: "How do I add my own components?",
-            content: {
-              blocks: [
-                {
-                  "@type": "@builder.io/sdk:Element",
-                  component: {
-                    name: "Text",
-                    options: {
-                      text: "<p>Create a folder under <code>packages/components/components/{category}/{Name}/</code> with an <code>index.tsx</code> and a <code>{Name}.builder.registration.tsx</code>. Register it in the matching <code>registry/{category}.ts</code> barrel and add it to an insert menu. Run <code>/new-component</code> in Claude Code to scaffold everything automatically.</p>",
-                    },
-                  },
-                },
-              ],
-            },
-          },
-          {
-            headline: "How do I manage the header and footer navigation?",
-            content: {
-              blocks: [
-                {
-                  "@type": "@builder.io/sdk:Element",
-                  component: {
-                    name: "Text",
-                    options: {
-                      text: "<p>Navigation menus are stored in the <strong>navigation</strong> data model in Builder.io. Edit the <em>primary-navigation</em> entry to update the header menu and the <em>footer-navigation</em> entry for the footer. Changes publish instantly without a redeploy.</p>",
-                    },
-                  },
-                },
-              ],
-            },
-          },
-          {
-            headline: "How do I set up URL redirects?",
-            content: {
-              blocks: [
-                {
-                  "@type": "@builder.io/sdk:Element",
-                  component: {
-                    name: "Text",
-                    options: {
-                      text: "<p>Open the <strong>url-redirect</strong> data model in Builder.io and edit the <em>redirects</em> entry. Add rows with <em>urlFrom</em>, <em>urlTo</em>, and whether it is permanent (308) or temporary (307). Redirect rules are applied by Next.js on the next deploy.</p>",
-                    },
-                  },
-                },
-              ],
-            },
-          },
-        ],
+        maxWidth: 1200,
+        lazyLoad: false,
       },
     },
     responsiveStyles: {
-      large: { display: "block" },
+      large: {
+        display: "flex",
+        flexDirection: "column",
+        position: "relative",
+        flexShrink: "0",
+        boxSizing: "border-box",
+        marginTop: "0px",
+        paddingLeft: "20px",
+        paddingRight: "20px",
+        paddingTop: "20px",
+        paddingBottom: "20px",
+        minHeight: "100px",
+      },
     },
+    children: [
+      {
+        "@type": "@builder.io/sdk:Element",
+        component: {
+          name: "Accordion",
+          options: {
+            theme: "light",
+            headline: "Frequently Asked Questions",
+            groups: [
+              {
+                headline: "What is this template?",
+                content: {
+                  blocks: [
+                    {
+                      "@type": "@builder.io/sdk:Element",
+                      component: {
+                        name: "Text",
+                        options: {
+                          text: "<p>This is a production-ready Next.js App Router starter integrated with Builder.io for visual content editing. It includes a blog system, site-context for global settings, navigation management, URL redirect rules, and a shared component library built with Tailwind CSS.</p>",
+                        },
+                      },
+                    },
+                  ],
+                },
+              },
+              {
+                headline: "How do I edit this page visually?",
+                content: {
+                  blocks: [
+                    {
+                      "@type": "@builder.io/sdk:Element",
+                      component: {
+                        name: "Text",
+                        options: {
+                          text: "<p>Open your Builder.io space and navigate to <strong>Pages</strong>. Click the <em>Home</em> entry to open it in the visual editor. From there you can drag-and-drop components, edit text inline, and publish changes without touching code.</p>",
+                        },
+                      },
+                    },
+                  ],
+                },
+              },
+              {
+                headline: "How do I add a new page?",
+                content: {
+                  blocks: [
+                    {
+                      "@type": "@builder.io/sdk:Element",
+                      component: {
+                        name: "Text",
+                        options: {
+                          text: "<p>In Builder.io, go to <strong>Pages → New Entry</strong>. Set the URL path (e.g. <code>/about</code>), add your components, and publish. The Next.js catch-all route (<code>[[...page]]</code>) automatically serves every published page entry.</p>",
+                        },
+                      },
+                    },
+                  ],
+                },
+              },
+              {
+                headline: "How do I add my own components?",
+                content: {
+                  blocks: [
+                    {
+                      "@type": "@builder.io/sdk:Element",
+                      component: {
+                        name: "Text",
+                        options: {
+                          text: "<p>Create a folder under <code>packages/components/components/{category}/{Name}/</code> with an <code>index.tsx</code> and a <code>{Name}.builder.registration.tsx</code>. Register it in the matching <code>registry/{category}.ts</code> barrel and add it to an insert menu. Run <code>/new-component</code> in Claude Code to scaffold everything automatically.</p>",
+                        },
+                      },
+                    },
+                  ],
+                },
+              },
+              {
+                headline: "How do I manage the header and footer navigation?",
+                content: {
+                  blocks: [
+                    {
+                      "@type": "@builder.io/sdk:Element",
+                      component: {
+                        name: "Text",
+                        options: {
+                          text: "<p>Navigation menus are stored in the <strong>navigation</strong> data model in Builder.io. Edit the <em>primary-navigation</em> entry to update the header menu and the <em>footer-navigation</em> entry for the footer. Changes publish instantly without a redeploy.</p>",
+                        },
+                      },
+                    },
+                  ],
+                },
+              },
+              {
+                headline: "How do I set up URL redirects?",
+                content: {
+                  blocks: [
+                    {
+                      "@type": "@builder.io/sdk:Element",
+                      component: {
+                        name: "Text",
+                        options: {
+                          text: "<p>Open the <strong>url-redirect</strong> data model in Builder.io and edit the <em>redirects</em> entry. Add rows with <em>urlFrom</em>, <em>urlTo</em>, and whether it is permanent (308) or temporary (307). Redirect rules are applied by Next.js on the next deploy.</p>",
+                        },
+                      },
+                    },
+                  ],
+                },
+              },
+            ],
+          },
+        },
+        responsiveStyles: {
+          large: { display: "block" },
+        },
+      },
+    ],
   },
 ];
 
@@ -934,6 +963,33 @@ async function ensureHomePage() {
   console.log(`✓ Applied blocks to "page" entry "${HOME_PAGE_NAME}" (data.blocks + top-level blocks).`);
 }
 
+function isPortInUse(port) {
+  return new Promise((resolve) => {
+    const server = createServer();
+    server.once("error", (err) => resolve(err.code === "EADDRINUSE"));
+    server.once("listening", () => { server.close(); resolve(false); });
+    server.listen(port);
+  });
+}
+
+async function ensureDevServerRunning() {
+  const running = await isPortInUse(3000);
+  if (running) {
+    console.log("• Dev server already running at http://localhost:3000 — skipping start.");
+    return;
+  }
+  console.log("\nStarting dev server...");
+  // Spawn from the monorepo root (scripts/ → app-0/ → apps/ → root).
+  const rootDir = resolve(__dirname, "../../..");
+  const dev = spawn("pnpm", ["dev"], {
+    cwd: rootDir,
+    stdio: "inherit",
+    detached: true,
+  });
+  dev.unref();
+  console.log("✓ Dev server starting at http://localhost:3000\n");
+}
+
 async function main() {
   console.log(`\nProvisioning Builder space...\n`);
 
@@ -1025,7 +1081,9 @@ async function main() {
   // remind the user to apply them manually in the Builder.io Settings UI.
   printSpaceSettingsReminder(BUILDER_SITE_URL, BUILDER_SPACE_DESCRIPTION);
 
-  console.log("\nDone. Restart the dev server if it's running.\n");
+  console.log("\nDone.\n");
+
+  await ensureDevServerRunning();
 }
 
 main().catch((err) => {
