@@ -3,7 +3,7 @@
  *
  * Run this once when bootstrapping a new Builder space from this template:
  *
- *   pnpm --filter app-0 init:builder
+ *   pnpm --filter template-test init:builder
  *
  * It is idempotent — re-running it will skip anything that already exists.
  *
@@ -38,7 +38,7 @@
  *      the Admin GraphQL API has no content-write mutation, so content creation
  *      must go through the Write API. Model = GraphQL, content = REST.
  *
- * Credentials are read from apps/app-0/.env.local:
+ * Credentials are read from apps/template-test/.env.local:
  *   - BUILDER_PRIVATE_KEY          (bpk-...)  — required, for writes
  *   - NEXT_PUBLIC_BUILDER_API_KEY             — required, to check existing content
  *   - NEXT_PUBLIC_SITE_CONTEXT_NAME           — entry name the app queries by
@@ -99,11 +99,11 @@ const referenceValue = (model, id) => ({
 });
 
 if (!PRIVATE_KEY) {
-  console.error("✗ BUILDER_PRIVATE_KEY is missing from apps/app-0/.env.local");
+  console.error("✗ BUILDER_PRIVATE_KEY is missing from apps/template-test/.env.local");
   process.exit(1);
 }
 if (!PUBLIC_KEY) {
-  console.error("✗ NEXT_PUBLIC_BUILDER_API_KEY is missing from apps/app-0/.env.local");
+  console.error("✗ NEXT_PUBLIC_BUILDER_API_KEY is missing from apps/template-test/.env.local");
   process.exit(1);
 }
 
@@ -425,41 +425,192 @@ const HOME_PAGE_QUERY = [
 ];
 
 const HOME_PAGE_BLOCKS = [
+  // --- Hero: Banner100 with TileContent on the left + Image on the right ---
+  // IDs are intentionally omitted — Builder.io auto-generates proper builder-{hex}
+  // IDs, which are required for blocks to be editable in the visual editor.
   {
     "@type": "@builder.io/sdk:Element",
-    id: "home-intro-text",
     component: {
-      name: "Text",
+      name: "Banner100",
       options: {
-        text: [
-          "<h1 style=\"font-size:2rem;font-weight:700;margin-bottom:1rem;\">",
-          "Welcome to the Builder App Router Template",
-          "</h1>",
-          "<p style=\"font-size:1.1rem;margin-bottom:1rem;\">",
-          "This is your starting point for building fast, content-managed websites",
-          " with <strong>Builder.io</strong> and the <strong>Next.js App Router</strong>.",
-          " Open your Builder.io space to start editing this page visually.",
-          "</p>",
-          "<ul style=\"list-style:disc;padding-left:1.5rem;\">",
-          "<li>Edit pages in the <strong>Builder.io visual editor</strong></li>",
-          "<li>Register your own components in <code>builder-registry.ts</code></li>",
-          "<li>Manage navigation and site settings from the CMS</li>",
-          "<li>Write articles under <strong>/blogs/[handle]</strong></li>",
-          "</ul>",
-        ].join(""),
+        theme: "light",
+        backgroundType: "none",
+        fullWidth: true,
+        alignment: "left",
+        content: {
+          blocks: [
+            {
+              "@type": "@builder.io/sdk:Element",
+              responsiveStyles: {
+                large: {
+                  display: "flex",
+                  gap: "48px",
+                  alignItems: "center",
+                  width: "100%",
+                  padding: "60px 40px",
+                  maxWidth: "1200px",
+                  margin: "0 auto",
+                },
+                small: {
+                  flexDirection: "column",
+                  padding: "32px 20px",
+                },
+              },
+              children: [
+                {
+                  "@type": "@builder.io/sdk:Element",
+                  component: {
+                    name: "TileContent",
+                    options: {
+                      theme: "light",
+                      inheritTheme: true,
+                      alignment: "left",
+                      maskOpacity: 0,
+                      eyebrow: "Builder.io + Next.js App Router",
+                      headline: "Your Starting Point for Visual Content",
+                      content:
+                        "<p>This template comes pre-wired with visual editing, a blog system, navigation management, SEO tooling, URL redirects, and a themeable component library — all out of the box. Open the Builder.io editor to start customizing, or explore the code to understand how everything fits together.</p>",
+                    },
+                  },
+                  responsiveStyles: {
+                    large: { flex: "1", minWidth: "0" },
+                  },
+                },
+                {
+                  "@type": "@builder.io/sdk:Element",
+                  component: {
+                    name: "Image",
+                    options: {
+                      image: "https://placehold.co/600x400.png?text=Template+Preview",
+                      altText: "Builder.io template site preview",
+                    },
+                  },
+                  responsiveStyles: {
+                    large: { flex: "1", minWidth: "0", height: "360px" },
+                    small: { width: "100%", height: "220px" },
+                  },
+                },
+              ],
+            },
+          ],
+        },
       },
     },
     responsiveStyles: {
-      large: {
-        display: "flex",
-        flexDirection: "column",
-        alignItems: "stretch",
-        flexShrink: "0",
-        position: "relative",
-        padding: "40px 20px",
-        maxWidth: "800px",
-        margin: "0 auto",
+      large: { display: "block" },
+    },
+  },
+
+  // --- FAQ: Accordion with template usage questions ---
+  {
+    "@type": "@builder.io/sdk:Element",
+    component: {
+      name: "Accordion",
+      options: {
+        theme: "light",
+        headline: "Frequently Asked Questions",
+        groups: [
+          {
+            headline: "What is this template?",
+            content: {
+              blocks: [
+                {
+                  "@type": "@builder.io/sdk:Element",
+                  component: {
+                    name: "Text",
+                    options: {
+                      text: "<p>This is a production-ready Next.js App Router starter integrated with Builder.io for visual content editing. It includes a blog system, site-context for global settings, navigation management, URL redirect rules, and a shared component library built with Tailwind CSS.</p>",
+                    },
+                  },
+                },
+              ],
+            },
+          },
+          {
+            headline: "How do I edit this page visually?",
+            content: {
+              blocks: [
+                {
+                  "@type": "@builder.io/sdk:Element",
+                  component: {
+                    name: "Text",
+                    options: {
+                      text: "<p>Open your Builder.io space and navigate to <strong>Pages</strong>. Click the <em>Home</em> entry to open it in the visual editor. From there you can drag-and-drop components, edit text inline, and publish changes without touching code.</p>",
+                    },
+                  },
+                },
+              ],
+            },
+          },
+          {
+            headline: "How do I add a new page?",
+            content: {
+              blocks: [
+                {
+                  "@type": "@builder.io/sdk:Element",
+                  component: {
+                    name: "Text",
+                    options: {
+                      text: "<p>In Builder.io, go to <strong>Pages → New Entry</strong>. Set the URL path (e.g. <code>/about</code>), add your components, and publish. The Next.js catch-all route (<code>[[...page]]</code>) automatically serves every published page entry.</p>",
+                    },
+                  },
+                },
+              ],
+            },
+          },
+          {
+            headline: "How do I add my own components?",
+            content: {
+              blocks: [
+                {
+                  "@type": "@builder.io/sdk:Element",
+                  component: {
+                    name: "Text",
+                    options: {
+                      text: "<p>Create a folder under <code>packages/components/components/{category}/{Name}/</code> with an <code>index.tsx</code> and a <code>{Name}.builder.registration.tsx</code>. Register it in the matching <code>registry/{category}.ts</code> barrel and add it to an insert menu. Run <code>/new-component</code> in Claude Code to scaffold everything automatically.</p>",
+                    },
+                  },
+                },
+              ],
+            },
+          },
+          {
+            headline: "How do I manage the header and footer navigation?",
+            content: {
+              blocks: [
+                {
+                  "@type": "@builder.io/sdk:Element",
+                  component: {
+                    name: "Text",
+                    options: {
+                      text: "<p>Navigation menus are stored in the <strong>navigation</strong> data model in Builder.io. Edit the <em>primary-navigation</em> entry to update the header menu and the <em>footer-navigation</em> entry for the footer. Changes publish instantly without a redeploy.</p>",
+                    },
+                  },
+                },
+              ],
+            },
+          },
+          {
+            headline: "How do I set up URL redirects?",
+            content: {
+              blocks: [
+                {
+                  "@type": "@builder.io/sdk:Element",
+                  component: {
+                    name: "Text",
+                    options: {
+                      text: "<p>Open the <strong>url-redirect</strong> data model in Builder.io and edit the <em>redirects</em> entry. Add rows with <em>urlFrom</em>, <em>urlTo</em>, and whether it is permanent (308) or temporary (307). Redirect rules are applied by Next.js on the next deploy.</p>",
+                    },
+                  },
+                },
+              ],
+            },
+          },
+        ],
       },
+    },
+    responsiveStyles: {
+      large: { display: "block" },
     },
   },
 ];
@@ -612,33 +763,15 @@ async function ensurePreviewUrl(modelName, logic, models) {
   console.log(`✓ Set preview URL logic on "${modelName}".`);
 }
 
-const UPDATE_SPACE = gql`
-  mutation UpdateSpace($body: JSONObject!) {
-    updateSpace(body: $body) {
-      id
-    }
-  }
-`;
-
-// Updates the Builder space's siteUrl and description via the Admin API.
-// Both fields are optional — omitted when empty. Fails open: a non-fatal
-// error (e.g. wrong mutation shape on older API versions) logs a warning
-// rather than aborting the seed.
-async function ensureSpaceSettings(siteUrl, description) {
+// The Builder.io Admin GraphQL API does not expose an updateSpace mutation,
+// and the REST space endpoint requires user-session auth rather than a private
+// key. Space-level settings must therefore be applied manually via the UI.
+function printSpaceSettingsReminder(siteUrl, description) {
   if (!siteUrl && !description) return;
-  const body = {};
-  if (siteUrl) body.siteUrl = siteUrl;
-  if (description) body.description = description;
-  try {
-    await client.request(UPDATE_SPACE, { body });
-    const parts = [siteUrl && `siteUrl="${siteUrl}"`, description && `description="${description}"`]
-      .filter(Boolean)
-      .join(", ");
-    console.log(`✓ Updated space settings: ${parts}.`);
-  } catch (err) {
-    console.warn(`⚠ Could not update space settings: ${err.message}`);
-    console.warn("  You can set Site URL and Description manually in Builder.io → Settings → Space.");
-  }
+  console.log("\n⚠ One manual step required in Builder.io → Settings → Space:");
+  if (siteUrl) console.log(`  • Site URL  → ${siteUrl}`);
+  if (description) console.log(`  • Description → ${description}`);
+  console.log("  These values cannot be set via the Admin API and must be saved through the UI.");
 }
 
 // Returns the first matching content entry, or null.
@@ -748,6 +881,59 @@ async function ensureSiteContext(headerNavId, footerNavId) {
   );
 }
 
+// Seeds or updates the home page. The Gen 2 SDK reads content.data.blocks,
+// so blocks must be written into data.blocks (not top-level blocks).
+async function ensureHomePage() {
+  let id;
+  const existing = await getEntry(PAGE_MODEL_NAME, HOME_PAGE_NAME);
+  if (existing) {
+    id = existing.id;
+  } else {
+    const res = await fetch(writeApi(PAGE_MODEL_NAME), {
+      method: "POST",
+      headers: {
+        Authorization: `Bearer ${PRIVATE_KEY}`,
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        name: HOME_PAGE_NAME,
+        published: "published",
+        data: HOME_PAGE_DATA,
+        query: HOME_PAGE_QUERY,
+      }),
+    });
+    if (!res.ok) {
+      const text = await res.text();
+      throw new Error(`Write API failed (${res.status}): ${text}`);
+    }
+    const created = await res.json();
+    id = created.id;
+    console.log(`✓ Created "page" entry "${HOME_PAGE_NAME}" (id: ${id}).`);
+    // Give the CDN a moment to register the new entry before patching.
+    await new Promise((r) => setTimeout(r, 2000));
+  }
+
+  // Always patch with blocks nested inside data — the Gen 2 SDK reads
+  // content.data.blocks and the CDN v3 API surfaces data sub-fields.
+  const patchRes = await fetch(writeUpdateApi(PAGE_MODEL_NAME, id), {
+    method: "PATCH",
+    headers: {
+      Authorization: `Bearer ${PRIVATE_KEY}`,
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify({
+      data: { ...HOME_PAGE_DATA, blocks: HOME_PAGE_BLOCKS },
+      blocks: HOME_PAGE_BLOCKS,
+      query: HOME_PAGE_QUERY,
+    }),
+  });
+  if (!patchRes.ok) {
+    const text = await patchRes.text();
+    throw new Error(`Write API failed (${patchRes.status}): ${text}`);
+  }
+  console.log(`✓ Applied blocks to "page" entry "${HOME_PAGE_NAME}" (data.blocks + top-level blocks).`);
+}
+
 async function main() {
   console.log(`\nProvisioning Builder space...\n`);
 
@@ -832,15 +1018,12 @@ async function main() {
 
   // Seed the home page at "/". The built-in `page` model is catch-all; we set
   // URL targeting via `query` so fetchOneEntry({ urlPath: "/" }) resolves it.
-  await ensureContent(PAGE_MODEL_NAME, HOME_PAGE_NAME, HOME_PAGE_DATA, {
-    query: HOME_PAGE_QUERY,
-    blocks: HOME_PAGE_BLOCKS,
-  });
+  // ensureHomePage always patches blocks so re-runs keep the page in sync.
+  await ensureHomePage();
 
-  // Update space-level settings (siteUrl, description) if provided via env vars.
-  // setup.mjs writes BUILDER_SITE_URL and BUILDER_SPACE_DESCRIPTION before invoking
-  // this script, so first-run setup flows through without extra manual steps.
-  await ensureSpaceSettings(BUILDER_SITE_URL, BUILDER_SPACE_DESCRIPTION);
+  // Space-level siteUrl and description cannot be set via the Admin API —
+  // remind the user to apply them manually in the Builder.io Settings UI.
+  printSpaceSettingsReminder(BUILDER_SITE_URL, BUILDER_SPACE_DESCRIPTION);
 
   console.log("\nDone. Restart the dev server if it's running.\n");
 }
