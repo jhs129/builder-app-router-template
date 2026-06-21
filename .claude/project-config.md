@@ -4,10 +4,10 @@ This file holds the per-project values the Claude Code commands need. It is
 populated by `pnpm setup`. You can also edit it by hand.
 
 ## Jira
-- Configured: no
-- Project key:
-- Cloud ID:
-- Base URL:
+- Configured: yes
+- Project key: GCW
+- Cloud ID: https://radicaldesign.atlassian.net
+- Base URL: https://radicaldesign.atlassian.net/browse/
 
 ## Vercel
-- Project name:
+- Project name: app-0
