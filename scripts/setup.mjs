@@ -10,8 +10,11 @@
  *      the main app's .env.local (preserving any other settings).
  *   2. Optionally rename the placeholder `app-0` app to something of your own,
  *      updating every reference across the monorepo and moving the directory.
- *   3. Seed the Builder space (runs `init:builder`) so the `site-context` and
- *      `article` models exist and the app builds.
+ *   3. Prompt for the Builder space Site URL and Description and store them in
+ *      .env.local so the seed script can apply them to the space via the Admin API.
+ *   4. Seed the Builder space (runs `init:builder`) so the `site-context`,
+ *      `article`, and `page` models exist, the home page is seeded at `/`,
+ *      the space siteUrl + description are updated, and the app builds.
  *
  * This runs from the repo root (not from inside the app), so it can safely
  * rename the app directory as the final step. After a rename you must re-run
@@ -212,46 +215,105 @@ async function main() {
   writeFileSync(envPath, envContent);
   console.log(`\n✓ Wrote keys to apps/${app.dir}/.env.local`);
 
-  // --- 1b. Claude Code command integrations (Jira + Vercel) ---
+  // --- 1b. App name (renames apps/app-0 and sets NEXT_PUBLIC_SITE_CONTEXT_NAME) ---
+  let appName = app.dir;
+  {
+    // On a fresh clone the directory is "app-0" (a template placeholder) — don't pre-fill it.
+    const defaultName = app.dir !== "app-0" ? app.dir : "";
+    while (true) {
+      const candidate = (await askWithDefault(
+        "App name (lowercase letters, numbers, dashes — also used as the Builder.io site context name)",
+        defaultName
+      )).toLowerCase();
+      if (!candidate) {
+        if (app.dir !== "app-0") {
+          // Re-run with an already-renamed app: keep current name.
+          break;
+        }
+        console.log("  An app name is required (e.g. my-app or gacore-web).");
+        continue;
+      }
+      if (!isValidAppName(candidate)) {
+        console.log("  Name must start with a letter and contain only lowercase letters, numbers, and dashes.");
+        continue;
+      }
+      if (candidate !== app.dir && existsSync(join(APPS_DIR, candidate))) {
+        console.log(`  apps/${candidate} already exists — pick a different name.`);
+        continue;
+      }
+      appName = candidate;
+      break;
+    }
+  }
+  const currentSiteContextName = readEnvValue(envContent, "NEXT_PUBLIC_SITE_CONTEXT_NAME");
+  if (appName !== currentSiteContextName) {
+    envContent = upsertEnv(envContent, "NEXT_PUBLIC_SITE_CONTEXT_NAME", appName);
+    writeFileSync(envPath, envContent);
+    console.log(`✓ Set NEXT_PUBLIC_SITE_CONTEXT_NAME="${appName}" in apps/${app.dir}/.env.local`);
+  }
+
+  // --- 1c. Builder space settings (siteUrl + description) ---
+  console.log("\nBuilder space settings (used by the editor preview and Builder UI):");
+  const builderSiteUrl = await askWithDefault(
+    "Site URL (the URL where your app runs, e.g. http://localhost:3000)",
+    readEnvValue(envContent, "BUILDER_SITE_URL") || "http://localhost:3000"
+  );
+  const builderSpaceDescription = await askWithDefault(
+    "Space description",
+    readEnvValue(envContent, "BUILDER_SPACE_DESCRIPTION") ||
+      `${appName} — Builder App Router Template`
+  );
+  envContent = upsertEnv(envContent, "BUILDER_SITE_URL", builderSiteUrl);
+  envContent = upsertEnv(
+    envContent,
+    "BUILDER_SPACE_DESCRIPTION",
+    builderSpaceDescription
+  );
+  writeFileSync(envPath, envContent);
+  console.log(`✓ Wrote BUILDER_SITE_URL and BUILDER_SPACE_DESCRIPTION to apps/${app.dir}/.env.local`);
+
+  // --- 1d. Claude Code command integrations (Jira + Vercel) ---
   console.log("\nClaude Code command config (.claude/project-config.md):");
   let jira = null;
   if (await askYesNo("\nConfigure Jira integration for the Claude Code commands?")) {
-    const projectKey = (await askWithDefault("  Jira project key (e.g. ACME)", readConfigValue("Project key"))).toUpperCase();
-    const cloudId = await askWithDefault("  Atlassian cloud ID", readConfigValue("Cloud ID"));
-    const defaultBase = readConfigValue("Base URL") ||
-      (projectKey ? `https://${projectKey.toLowerCase()}.atlassian.net/browse/` : "");
-    const baseUrl = await askWithDefault("  Jira base URL", defaultBase);
-    jira = { projectKey, cloudId, baseUrl };
+    // Reconstruct a sample URL from existing config so re-running setup pre-fills nicely.
+    const existingKey = readConfigValue("Project key");
+    const existingBase = readConfigValue("Base URL");
+    const candidate = (existingKey && existingBase) ? `${existingBase}${existingKey}-1` : "";
+    const defaultJiraUrl = /^https?:\/\//.test(candidate) ? candidate : "";
+
+    let parsed = false;
+    while (!parsed) {
+      const jiraUrl = await askWithDefault(
+        "  Paste a Jira ticket URL (e.g. https://yourorg.atlassian.net/browse/PROJ-1)",
+        defaultJiraUrl
+      );
+      if (!jiraUrl) {
+        console.log("  Skipping Jira config.");
+        break;
+      }
+      const m = jiraUrl.match(/^(https?:\/\/([^/]+)\/browse\/)([A-Za-z][A-Za-z0-9]*)-\d+/i);
+      if (!m) {
+        console.log("  Could not parse that URL. Expected format: https://yourorg.atlassian.net/browse/PROJ-1");
+        continue;
+      }
+      jira = {
+        projectKey: m[3].toUpperCase(),
+        cloudId: `https://${m[2]}`,
+        baseUrl: m[1],
+      };
+      parsed = true;
+    }
   }
   const vercelProject = await askWithDefault(
     "Vercel project name (for preview-deployment detection)",
-    readConfigValue("Project name") || app.dir
+    readConfigValue("Project name") || appName
   );
   const cfgPath = writeProjectConfig({ jira, vercelProject });
   console.log(`✓ Wrote ${cfgPath.replace(ROOT + "/", "")}`);
 
-  // --- 2. Optional rename ---
-  let newName = null;
-  if (await askYesNo(`\nRename the "${app.dir}" app to something else?`)) {
-    while (true) {
-      const candidate = (await ask("New app name (lowercase, e.g. acme-web): "))
-        .toLowerCase();
-      if (!isValidAppName(candidate)) {
-        console.log("  Name must be lowercase letters, numbers, and dashes (start with a letter).");
-        continue;
-      }
-      if (candidate === app.dir) {
-        console.log("  That's the current name — pick a different one.");
-        continue;
-      }
-      if (existsSync(join(APPS_DIR, candidate))) {
-        console.log(`  apps/${candidate} already exists — pick a different name.`);
-        continue;
-      }
-      newName = candidate;
-      break;
-    }
-  }
+  // --- 2. Rename derived from app name (already validated above) ---
+  const newName = appName !== app.dir ? appName : null;
 
   // --- 3. Seed Builder models/content (before any rename, using the current name) ---
   console.log(`\nSeeding Builder models (pnpm --filter ${app.name} init:builder)...\n`);

@@ -71,6 +71,8 @@ const PRIVATE_KEY = process.env.BUILDER_PRIVATE_KEY;
 const PUBLIC_KEY = process.env.NEXT_PUBLIC_BUILDER_API_KEY;
 const SITE_CONTEXT_NAME =
   process.env.NEXT_PUBLIC_SITE_CONTEXT_NAME || "builder-app-template";
+const BUILDER_SITE_URL = process.env.BUILDER_SITE_URL || "";
+const BUILDER_SPACE_DESCRIPTION = process.env.BUILDER_SPACE_DESCRIPTION || "";
 
 const MODEL_NAME = "site-context";
 const ARTICLE_MODEL_NAME = "article";
@@ -409,6 +411,59 @@ const URL_REDIRECT_DATA = {
   ],
 };
 
+// --- Home page seeded into the built-in `page` model at URL path "/" ---
+const HOME_PAGE_NAME = "home";
+
+const HOME_PAGE_DATA = {
+  url: "/",
+  title: "Home",
+};
+
+// URL targeting so fetchOneEntry({ userAttributes: { urlPath: "/" } }) matches.
+const HOME_PAGE_QUERY = [
+  { property: "urlPath", operator: "is", value: "/" },
+];
+
+const HOME_PAGE_BLOCKS = [
+  {
+    "@type": "@builder.io/sdk:Element",
+    id: "home-intro-text",
+    component: {
+      name: "Text",
+      options: {
+        text: [
+          "<h1 style=\"font-size:2rem;font-weight:700;margin-bottom:1rem;\">",
+          "Welcome to the Builder App Router Template",
+          "</h1>",
+          "<p style=\"font-size:1.1rem;margin-bottom:1rem;\">",
+          "This is your starting point for building fast, content-managed websites",
+          " with <strong>Builder.io</strong> and the <strong>Next.js App Router</strong>.",
+          " Open your Builder.io space to start editing this page visually.",
+          "</p>",
+          "<ul style=\"list-style:disc;padding-left:1.5rem;\">",
+          "<li>Edit pages in the <strong>Builder.io visual editor</strong></li>",
+          "<li>Register your own components in <code>builder-registry.ts</code></li>",
+          "<li>Manage navigation and site settings from the CMS</li>",
+          "<li>Write articles under <strong>/blogs/[handle]</strong></li>",
+          "</ul>",
+        ].join(""),
+      },
+    },
+    responsiveStyles: {
+      large: {
+        display: "flex",
+        flexDirection: "column",
+        alignItems: "stretch",
+        flexShrink: "0",
+        position: "relative",
+        padding: "40px 20px",
+        maxWidth: "800px",
+        margin: "0 auto",
+      },
+    },
+  },
+];
+
 const ADD_MODEL = gql`
   mutation addModel($body: JSONObject!) {
     addModel(body: $body) {
@@ -557,6 +612,35 @@ async function ensurePreviewUrl(modelName, logic, models) {
   console.log(`✓ Set preview URL logic on "${modelName}".`);
 }
 
+const UPDATE_SPACE = gql`
+  mutation UpdateSpace($body: JSONObject!) {
+    updateSpace(body: $body) {
+      id
+    }
+  }
+`;
+
+// Updates the Builder space's siteUrl and description via the Admin API.
+// Both fields are optional — omitted when empty. Fails open: a non-fatal
+// error (e.g. wrong mutation shape on older API versions) logs a warning
+// rather than aborting the seed.
+async function ensureSpaceSettings(siteUrl, description) {
+  if (!siteUrl && !description) return;
+  const body = {};
+  if (siteUrl) body.siteUrl = siteUrl;
+  if (description) body.description = description;
+  try {
+    await client.request(UPDATE_SPACE, { body });
+    const parts = [siteUrl && `siteUrl="${siteUrl}"`, description && `description="${description}"`]
+      .filter(Boolean)
+      .join(", ");
+    console.log(`✓ Updated space settings: ${parts}.`);
+  } catch (err) {
+    console.warn(`⚠ Could not update space settings: ${err.message}`);
+    console.warn("  You can set Site URL and Description manually in Builder.io → Settings → Space.");
+  }
+}
+
 // Returns the first matching content entry, or null.
 async function getEntry(model, name) {
   const url =
@@ -573,7 +657,8 @@ async function getEntry(model, name) {
 }
 
 // Creates the entry if it doesn't exist. Returns the entry id either way.
-async function ensureContent(model, name, data) {
+// `extra` is merged into the top-level POST body (e.g. { blocks, query } for page entries).
+async function ensureContent(model, name, data, extra = {}) {
   const existing = await getEntry(model, name);
   if (existing) {
     console.log(
@@ -587,7 +672,7 @@ async function ensureContent(model, name, data) {
       Authorization: `Bearer ${PRIVATE_KEY}`,
       "Content-Type": "application/json",
     },
-    body: JSON.stringify({ name, published: "published", data }),
+    body: JSON.stringify({ name, published: "published", data, ...extra }),
   });
   if (!res.ok) {
     const text = await res.text();
@@ -744,6 +829,18 @@ async function main() {
     URL_REDIRECT_ENTRY_NAME,
     URL_REDIRECT_DATA
   );
+
+  // Seed the home page at "/". The built-in `page` model is catch-all; we set
+  // URL targeting via `query` so fetchOneEntry({ urlPath: "/" }) resolves it.
+  await ensureContent(PAGE_MODEL_NAME, HOME_PAGE_NAME, HOME_PAGE_DATA, {
+    query: HOME_PAGE_QUERY,
+    blocks: HOME_PAGE_BLOCKS,
+  });
+
+  // Update space-level settings (siteUrl, description) if provided via env vars.
+  // setup.mjs writes BUILDER_SITE_URL and BUILDER_SPACE_DESCRIPTION before invoking
+  // this script, so first-run setup flows through without extra manual steps.
+  await ensureSpaceSettings(BUILDER_SITE_URL, BUILDER_SPACE_DESCRIPTION);
 
   console.log("\nDone. Restart the dev server if it's running.\n");
 }
