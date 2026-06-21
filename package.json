@@ -17,7 +17,9 @@
     "dev:app-0": "turbo run dev --filter=app-0",
     "dev:storybook": "turbo run storybook --filter=storybook-app",
     "build:app-0": "turbo run build --filter=app-0",
-    "build:storybook": "turbo run build-storybook --filter=storybook-app"
+    "build:storybook": "turbo run build-storybook --filter=storybook-app",
+    "build:plugins": "pnpm --filter builder-plugins build && pnpm --filter @jhsdc/builder-input-types build",
+    "dev:plugin": "pnpm --filter @jhsdc/builder-input-types dev"
   },
   "devDependencies": {
     "turbo": "^2.5.5",
