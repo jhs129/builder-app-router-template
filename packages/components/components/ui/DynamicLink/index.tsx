@@ -4,7 +4,7 @@ import { ThemeProvider } from "../../common/ThemeProvider";
 import type { CMSLinkProps, Themeable, Stylable } from "@repo/types";
 
 interface DynamicLinkComponentProps extends Themeable, Stylable {
-  link: CMSLinkProps | string;
+  link?: CMSLinkProps | string;
   label?: string;
   children?: React.ReactNode;
   openInNewTab?: boolean;
@@ -13,7 +13,8 @@ interface DynamicLinkComponentProps extends Themeable, Stylable {
   onClick?: (event: React.MouseEvent<HTMLAnchorElement>) => void;
 }
 
-function resolveHref(link: CMSLinkProps | string): string {
+function resolveHref(link: CMSLinkProps | string | undefined): string {
+  if (!link) return "#";
   if (typeof link === "string") return link;
   if (link.type === "model") {
     if (!link.model || !link.referenceId) return link.href || "#";
@@ -22,9 +23,9 @@ function resolveHref(link: CMSLinkProps | string): string {
   return link.href || "#";
 }
 
-function shouldOpenInNewTab(link: CMSLinkProps | string, override?: boolean): boolean {
+function shouldOpenInNewTab(link: CMSLinkProps | string | undefined, override?: boolean): boolean {
   if (override) return true;
-  if (typeof link !== "string" && link.openInNewTab) return true;
+  if (link && typeof link !== "string" && link.openInNewTab) return true;
   return false;
 }
 
