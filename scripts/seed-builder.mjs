@@ -3,7 +3,7 @@
  *
  * Run this once when bootstrapping a new Builder space from this template:
  *
- *   pnpm --filter template-test init:builder
+ *   pnpm --filter app-0 init:builder    (replace app-0 with your app name)
  *
  * It is idempotent — re-running it will skip anything that already exists.
  *
@@ -12,9 +12,11 @@
  *      API — the `addModel` mutation). The app's RootLayout calls
  *      `getSiteContext()` which queries this model; without it the SDK throws
  *      "Error fetching data."
- *   2. Creates the `article` page model used by the /blogs/[handle] route and
+ *   2. Creates the `article` section model used by the /blogs/[handle] route and
  *      the sitemap. Without it `next build` fails collecting that route with
  *      "Model not found" when fetchEntries({ model: "article" }) 404s.
+ *      Using `kind: "section"` because articles are fetched by `data.handle`
+ *      rather than URL path — they appear under "Section models" in Builder.
  *   3. Creates the `navigation` data model and adds the header/footer
  *      navigation reference fields to `site-context`. DefaultHeader and
  *      DefaultFooter read `siteContext.data.headerNavigation1/2` and
@@ -38,25 +40,41 @@
  *      the Admin GraphQL API has no content-write mutation, so content creation
  *      must go through the Write API. Model = GraphQL, content = REST.
  *
- * Credentials are read from apps/app-0/.env.local:
+ * Credentials are read from the main app's .env.local (auto-detected under apps/):
  *   - BUILDER_PRIVATE_KEY          (bpk-...)  — required, for writes
  *   - NEXT_PUBLIC_BUILDER_API_KEY             — required, to check existing content
  *   - NEXT_PUBLIC_SITE_CONTEXT_NAME           — entry name the app queries by
  */
 
 import { GraphQLClient, gql } from "graphql-request";
-import { readFileSync } from "node:fs";
+import { readFileSync, readdirSync, existsSync } from "node:fs";
 import { fileURLToPath } from "node:url";
-import { dirname, resolve } from "node:path";
+import { dirname, resolve, join } from "node:path";
 import { createServer } from "node:net";
 import { spawn } from "node:child_process";
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
+const ROOT = resolve(__dirname, "..");
+const APPS_DIR = join(ROOT, "apps");
+
+function findMainApp() {
+  for (const entry of readdirSync(APPS_DIR)) {
+    const pkgPath = join(APPS_DIR, entry, "package.json");
+    if (!existsSync(pkgPath)) continue;
+    const pkg = JSON.parse(readFileSync(pkgPath, "utf8"));
+    const deps = { ...pkg.dependencies, ...pkg.devDependencies };
+    if (pkg.name !== "storybook-app" && deps["@builder.io/sdk-react"]) {
+      return { dir: entry, name: pkg.name, path: join(APPS_DIR, entry) };
+    }
+  }
+  throw new Error("Could not find the main Next.js app under apps/.");
+}
 
 // --- Load .env.local (standalone node scripts don't get Next's env loading) ---
 function loadEnvLocal() {
   try {
-    const raw = readFileSync(resolve(__dirname, "..", ".env.local"), "utf8");
+    const app = findMainApp();
+    const raw = readFileSync(join(app.path, ".env.local"), "utf8");
     for (const line of raw.split("\n")) {
       const match = line.match(/^\s*([A-Z0-9_]+)\s*=\s*(.*)\s*$/);
       if (match && !process.env[match[1]]) {
@@ -101,11 +119,11 @@ const referenceValue = (model, id) => ({
 });
 
 if (!PRIVATE_KEY) {
-  console.error("✗ BUILDER_PRIVATE_KEY is missing from apps/app-0/.env.local");
+  console.error("✗ BUILDER_PRIVATE_KEY is missing from the main app's .env.local");
   process.exit(1);
 }
 if (!PUBLIC_KEY) {
-  console.error("✗ NEXT_PUBLIC_BUILDER_API_KEY is missing from apps/app-0/.env.local");
+  console.error("✗ NEXT_PUBLIC_BUILDER_API_KEY is missing from the main app's .env.local");
   process.exit(1);
 }
 
@@ -269,11 +287,13 @@ const METADATA_MODEL_BODY = {
 };
 
 // --- article model definition (mirrors ArticleData in @repo/types) ---
-// kind: "page" so entries carry Builder visual-editor blocks, which the
-// /blogs/[handle] route renders via <RenderBuilderContent model="article">.
+// kind: "component" — this is Builder's internal name for what the sidebar
+// labels "Section models". Articles carry visual-editor blocks but are
+// fetched by data.handle rather than URL path, so they belong here rather
+// than under "Page models" (kind: "page").
 const ARTICLE_MODEL_BODY = {
   name: ARTICLE_MODEL_NAME,
-  kind: "page",
+  kind: "component",
   showTargeting: false,
   editingUrlLogic: ARTICLE_PREVIEW_URL_LOGIC,
   fields: [
@@ -357,7 +377,13 @@ const PRIMARY_NAV_DATA = {
         { text: "Team", href: "/about/team" },
       ],
     },
-    { text: "Blog", href: "/blogs" },
+    {
+      text: "Blog",
+      href: "/blogs",
+      level2: [
+        { text: "Hello World", href: "/blogs/hello-world" },
+      ],
+    },
     { text: "Contact", href: "/contact" },
   ],
 };
@@ -979,8 +1005,7 @@ async function ensureDevServerRunning() {
     return;
   }
   console.log("\nStarting dev server...");
-  // Spawn from the monorepo root (scripts/ → app-0/ → apps/ → root).
-  const rootDir = resolve(__dirname, "../../..");
+  const rootDir = resolve(__dirname, "..");
   const dev = spawn("pnpm", ["dev"], {
     cwd: rootDir,
     stdio: "inherit",
