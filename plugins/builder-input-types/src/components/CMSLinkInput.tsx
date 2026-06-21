@@ -24,8 +24,10 @@ const CMSLinkInput: React.FC<CMSLinkInputProps> = ({ value, onChange, defaultTyp
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const pluginSettings = (appState as any)?.user?.organization?.value?.settings?.plugins?.get?.("@jhsdc/builder-input-types");
 
+  const appState2 = (appState as any).user?.organization;
+  console.log("App State 2", appState2);
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const apiKey = pluginSettings?.get?.("CMSLinkSettings")?.get?.("apiKey") || (appState as any).user?.currentOrganization || "";
+  const apiKey = pluginSettings?.get?.("CMSLinkSettings")?.get?.("apiKey") || (appState as any).user?.mainSpaceApiKey || "";
 
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const models = pluginSettings?.get?.("CMSLinkSettings")?.toJSON?.()?.models?.map?.((model: any) => ({

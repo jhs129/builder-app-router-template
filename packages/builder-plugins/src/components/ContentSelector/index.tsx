@@ -1,5 +1,4 @@
 import React, { useState, useEffect } from 'react';
-import { builder } from '@builder.io/react';
 
 interface HitItem {
   id: string;
@@ -27,25 +26,21 @@ export const ContentSelector: React.FC<ContentSelectorProps> = ({
   const [selectedModel, setSelectedModel] = useState('');
 
   useEffect(() => {
-    if (apiKey && !builder.apiKey) {
-      builder.init(apiKey);
-      builder.apiVersion = 'v3';
-    }
-  }, [apiKey]);
-
-  useEffect(() => {
     if (selectedModel && apiKey) {
       setIsLoading(true);
-      builder
-        .getAll(selectedModel, {
-          fields: 'id,name,data.title,data.url,data.slug',
-          options: { noTargeting: true, includeRefs: true },
-        })
-        .then((results) =>
+      const url = new URL(`https://cdn.builder.io/api/v2/content/${selectedModel}`);
+      url.searchParams.set('apiKey', apiKey);
+      url.searchParams.set('limit', '100');
+      url.searchParams.set('noTargeting', 'true');
+      url.searchParams.set('includeRefs', 'true');
+      url.searchParams.set('fields', 'id,name,data.title,data.url,data.slug');
+      fetch(url.toString())
+        .then((r) => r.json())
+        .then((data) =>
           setSearchResults(
-            results
-              .filter((r) => typeof r.id === 'string')
-              .map((r) => ({ id: r.id as string, name: r.name, data: r.data as HitItem['data'] }))
+            (data.results || [])
+              .filter((r: HitItem) => typeof r.id === 'string')
+              .map((r: HitItem) => ({ id: r.id, name: r.name, data: r.data }))
           )
         )
         .catch(() => setSearchResults([]))

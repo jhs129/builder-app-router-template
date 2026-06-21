@@ -1,5 +1,4 @@
 import React, { useState, ChangeEvent, useEffect } from 'react';
-import { builder } from '@builder.io/react';
 import { ContentSelector } from '../ContentSelector';
 
 export interface CMSLinkProps {
@@ -68,15 +67,14 @@ export const CMSLink: React.FC<CMSLinkProps> = ({
 
   const fetchContentName = async (modelName: string, contentId: string) => {
     try {
-      if (!builder.apiKey && apiKey) {
-        builder.init(apiKey);
-        builder.apiVersion = 'v3';
-      }
-      const content = await builder.get(modelName, {
-        query: { id: contentId },
-        fields: 'id,name,data.title',
-        options: { noTargeting: true, includeRefs: true },
-      });
+      const url = new URL(`https://cdn.builder.io/api/v2/content/${modelName}`);
+      url.searchParams.set('apiKey', apiKey);
+      url.searchParams.set('query.id', contentId);
+      url.searchParams.set('limit', '1');
+      url.searchParams.set('fields', 'id,name,data.title');
+      const res = await fetch(url.toString());
+      const data = await res.json();
+      const content = data.results?.[0];
       setSelectedContentName(content ? (content.name || content.data?.title || contentId) : 'Content not found');
     } catch {
       setSelectedContentName('Error loading content');
