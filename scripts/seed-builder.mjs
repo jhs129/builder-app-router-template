@@ -89,6 +89,7 @@ loadEnvLocal();
 
 const PRIVATE_KEY = process.env.BUILDER_PRIVATE_KEY;
 const PUBLIC_KEY = process.env.NEXT_PUBLIC_BUILDER_API_KEY;
+const CMS_LINK_PLUGIN_URL = process.env.BUILDER_CMS_LINK_PLUGIN_URL || "";
 const SITE_CONTEXT_NAME =
   process.env.NEXT_PUBLIC_SITE_CONTEXT_NAME || "builder-app-template";
 const BUILDER_SITE_URL = process.env.BUILDER_SITE_URL || "";
@@ -818,6 +819,31 @@ async function ensurePreviewUrl(modelName, logic, models) {
   console.log(`✓ Set preview URL logic on "${modelName}".`);
 }
 
+// Builder.io does not expose a plugin-install mutation in the Admin GraphQL API,
+// and the plugin registry endpoint requires user-session auth rather than a
+// private key. Print instructions so the developer can complete the step manually.
+//
+// The @jhsdc/builder-input-types plugin provides the `CMSLink` custom input type
+// used by the DynamicLink component. Without it, any component that declares an
+// input with type: "CMSLink" will fall back to a plain text field in the editor.
+//
+// How to install:
+//   1. Build the plugin:  cd <plugin-repo>/plugins/builder-input-types && pnpm build
+//   2. Host `dist/plugin.system.js` (e.g. deploy to Vercel, Netlify, or a CDN).
+//   3. In Builder.io → Space Settings → Plugins → "Add plugin" → paste the hosted URL.
+function printPluginReminder(pluginUrl) {
+  console.log("\n⚠ Manual step required — install the CMSLink plugin in Builder.io:");
+  console.log("  1. Build @jhsdc/builder-input-types and host plugin.system.js.");
+  if (pluginUrl) {
+    console.log(`  2. Plugin URL configured: ${pluginUrl}`);
+    console.log("  3. In Builder.io → Space Settings → Plugins → Add plugin → paste the URL above.");
+  } else {
+    console.log("  2. In Builder.io → Space Settings → Plugins → Add plugin → paste the hosted URL.");
+    console.log("     (Set BUILDER_CMS_LINK_PLUGIN_URL in .env.local to suppress this reminder.)");
+  }
+  console.log("  Without the plugin, CMSLink inputs appear as plain text in the editor.");
+}
+
 // The Builder.io Admin GraphQL API does not expose an updateSpace mutation,
 // and the REST space endpoint requires user-session auth rather than a private
 // key. Space-level settings must therefore be applied manually via the UI.
@@ -1105,6 +1131,9 @@ async function main() {
   // Space-level siteUrl and description cannot be set via the Admin API —
   // remind the user to apply them manually in the Builder.io Settings UI.
   printSpaceSettingsReminder(BUILDER_SITE_URL, BUILDER_SPACE_DESCRIPTION);
+
+  // The CMSLink plugin must be installed manually via the Builder.io UI.
+  printPluginReminder(CMS_LINK_PLUGIN_URL);
 
   console.log("\nDone.\n");
 

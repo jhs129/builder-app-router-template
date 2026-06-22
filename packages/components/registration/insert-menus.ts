@@ -27,6 +27,7 @@ export const INSERT_MENUS = {
       { name: "Accordion" },
       { name: "Alert" },
       { name: "Button" },
+      { name: "DynamicLink" },
       { name: "Headline" },
       { name: "Text" },
       { name: "Image" },

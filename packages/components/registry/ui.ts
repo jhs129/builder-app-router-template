@@ -5,6 +5,7 @@ import { registration as accordion } from "../components/ui/Accordion/Accordion.
 import { registration as alert } from "../components/ui/Alert/Alert.builder.registration";
 import { registration as designKitOverview } from "../components/ui/DesignKitOverview/DesignKitOverview.builder.registration";
 import { registration as headline } from "../components/ui/Headline/Headline.builder.registration";
+import { registration as dynamicLink } from "../components/ui/DynamicLink/DynamicLink.builder.registration";
 
 // Each UI component owns its own Builder registration alongside its
 // implementation. This barrel just concatenates them in display order.
@@ -15,4 +16,5 @@ export const uiComponents: RegisteredComponent[] = [
   ...alert,
   ...designKitOverview,
   ...headline,
+  ...dynamicLink,
 ];
