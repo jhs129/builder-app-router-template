@@ -3,7 +3,10 @@
  *
  * Run from the repo root after cloning:
  *
- *   pnpm setup
+ *   pnpm configure
+ *
+ * NOTE: Use `pnpm configure`, NOT `pnpm setup` — `pnpm setup` is a reserved
+ * pnpm built-in that configures the shell environment and ignores this script.
  *
  * It will:
  *   1. Prompt for your Builder.io public + private API keys and write them into
@@ -156,7 +159,7 @@ function writeProjectConfig({ jira, vercelProject }) {
   const content = `# Project Config (read by .claude/commands/*)
 
 This file holds the per-project values the Claude Code commands need. It is
-populated by \`pnpm setup\`. You can also edit it by hand.
+populated by \`pnpm configure\`. You can also edit it by hand.
 
 ## Jira
 - Configured: ${jira ? "yes" : "no"}
@@ -215,29 +218,23 @@ async function main() {
   writeFileSync(envPath, envContent);
   console.log(`\n✓ Wrote keys to apps/${app.dir}/.env.local`);
 
-  // --- 1b. App name (renames apps/app-0 and sets NEXT_PUBLIC_SITE_CONTEXT_NAME) ---
+  // --- 1b. App name (optionally renames the app and sets NEXT_PUBLIC_SITE_CONTEXT_NAME) ---
   let appName = app.dir;
   {
-    // On a fresh clone the directory is "app-0" (a template placeholder) — don't pre-fill it.
-    const defaultName = app.dir !== "app-0" ? app.dir : "";
     while (true) {
       const candidate = (await askWithDefault(
-        "App name (lowercase letters, numbers, dashes — also used as the Builder.io site context name)",
-        defaultName
+        "App name (press Enter to keep, or enter a new name to rename — lowercase, letters/numbers/dashes)",
+        app.dir
       )).toLowerCase();
-      if (!candidate) {
-        if (app.dir !== "app-0") {
-          // Re-run with an already-renamed app: keep current name.
-          break;
-        }
-        console.log("  An app name is required (e.g. my-app or gacore-web).");
-        continue;
+      if (!candidate || candidate === app.dir) {
+        // Keep current name — no rename needed.
+        break;
       }
       if (!isValidAppName(candidate)) {
         console.log("  Name must start with a letter and contain only lowercase letters, numbers, and dashes.");
         continue;
       }
-      if (candidate !== app.dir && existsSync(join(APPS_DIR, candidate))) {
+      if (existsSync(join(APPS_DIR, candidate))) {
         console.log(`  apps/${candidate} already exists — pick a different name.`);
         continue;
       }
@@ -322,7 +319,7 @@ async function main() {
     stdio: "inherit",
   });
   if (seed.status !== 0) {
-    console.error("\n✗ Seeding failed. Fix the error above and re-run `pnpm setup`.");
+    console.error("\n✗ Seeding failed. Fix the error above and re-run `pnpm configure`.");
     process.exit(1);
   }
 
@@ -337,7 +334,6 @@ async function main() {
       join(APPS_DIR, "storybook", ".storybook", "preview.ts"),
       join(APPS_DIR, "storybook", "postcss.config.mjs"),
       join(app.path, "package.json"),
-      join(app.path, "scripts", "seed-builder.mjs"),
       join(ROOT, ".claude", "project-config.md"),
     ];
     for (const file of filesToUpdate) replaceInFile(file, app.dir, newName);

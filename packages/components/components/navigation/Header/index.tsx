@@ -2,7 +2,7 @@
 
 import Image from "next/image";
 import Link from "next/link";
-import { useState, useRef, useEffect } from "react";
+import { useState } from "react";
 import { Navigation } from "@repo/types";
 import { useSiteContext } from "../../../contexts/SiteContextProvider";
 import { HeaderNavItem } from "./HeaderNavItem";
@@ -42,9 +42,6 @@ const defaultNavigation: Navigation = {
 
 const Header = ({ navigation = defaultNavigation, logo }: HeaderProps) => {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
-  const [openDropdown, setOpenDropdown] = useState<string | null>(null);
-  const [openSubDropdown, setOpenSubDropdown] = useState<string | null>(null);
-  const navRef = useRef<HTMLElement>(null);
 
   const navItems = (navigation || defaultNavigation).data.level1;
 
@@ -54,35 +51,6 @@ const Header = ({ navigation = defaultNavigation, logo }: HeaderProps) => {
   const logoSrc = logo || "https://placehold.co/400x100.png?text=Logo";
 
   const { siteContext } = useSiteContext();
-
-  // Close desktop dropdowns when clicking outside the nav
-  useEffect(() => {
-    const handleClickOutside = (event: MouseEvent) => {
-      if (navRef.current && !navRef.current.contains(event.target as Node)) {
-        setOpenDropdown(null);
-        setOpenSubDropdown(null);
-      }
-    };
-
-    document.addEventListener("mousedown", handleClickOutside);
-    return () => {
-      document.removeEventListener("mousedown", handleClickOutside);
-    };
-  }, []);
-
-  const handleDropdownToggle = (itemText: string) => {
-    setOpenDropdown(openDropdown === itemText ? null : itemText);
-    setOpenSubDropdown(null);
-  };
-
-  const handleSubDropdownToggle = (itemText: string) => {
-    setOpenSubDropdown(openSubDropdown === itemText ? null : itemText);
-  };
-
-  const closeDropdowns = () => {
-    setOpenDropdown(null);
-    setOpenSubDropdown(null);
-  };
 
   return (
     <header
@@ -111,16 +79,12 @@ const Header = ({ navigation = defaultNavigation, logo }: HeaderProps) => {
           </Link>
 
           {/* Desktop Navigation (right) */}
-          <nav ref={navRef} className="hidden lg:flex items-center space-x-8">
+          <nav className="hidden lg:flex items-center space-x-8">
             {navItems.map((item) => (
               <HeaderNavItem
                 key={item.text}
                 item={item}
-                openDropdown={openDropdown}
-                openSubDropdown={openSubDropdown}
-                onToggle={handleDropdownToggle}
-                onSubToggle={handleSubDropdownToggle}
-                onNavigate={closeDropdowns}
+                onNavigate={() => setIsMobileMenuOpen(false)}
               />
             ))}
           </nav>

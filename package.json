@@ -7,7 +7,7 @@
   "homepage": "https://www.jhsdigitalconsulting.com",
   "packageManager": "pnpm@9.15.4",
   "scripts": {
-    "setup": "node scripts/setup.mjs",
+    "configure": "node scripts/setup.mjs",
     "build": "turbo run build --filter=!storybook-app",
     "build-all": "turbo run build",
     "dev": "turbo run dev",
@@ -20,6 +20,9 @@
     "build:storybook": "turbo run build-storybook --filter=storybook-app",
     "build:plugins": "pnpm --filter builder-plugins build && pnpm --filter @jhsdc/builder-input-types build",
     "dev:plugin": "pnpm --filter @jhsdc/builder-input-types dev"
+  },
+  "dependencies": {
+    "graphql-request": "^7.2.0"
   },
   "devDependencies": {
     "turbo": "^2.5.5",

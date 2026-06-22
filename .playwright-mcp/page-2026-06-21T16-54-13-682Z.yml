@@ -1,0 +1,121 @@
+- generic [active] [ref=e1]:
+  - link "Skip to main content" [ref=e2] [cursor=pointer]:
+    - /url: "#main-content"
+  - generic [ref=e3]:
+    - banner [ref=e4]:
+      - generic [ref=e6]:
+        - link "Builder App Template Logo" [ref=e7] [cursor=pointer]:
+          - /url: /
+          - img "Builder App Template Logo" [ref=e9]
+        - navigation [ref=e10]:
+          - link "Home" [ref=e12] [cursor=pointer]:
+            - /url: /
+          - button "About" [ref=e14] [cursor=pointer]:
+            - generic [ref=e15]: About
+            - img [ref=e16]
+          - button "Blog" [ref=e19] [cursor=pointer]:
+            - generic [ref=e20]: Blog
+            - img [ref=e21]
+          - link "Contact" [ref=e24] [cursor=pointer]:
+            - /url: /contact
+    - main [ref=e25]:
+      - generic [ref=e27]:
+        - generic [ref=e33]:
+          - generic [ref=e36]:
+            - heading "Builder.io + Next.js App Router" [level=3] [ref=e37]
+            - heading "Your Starting Point for Visual Content" [level=2] [ref=e38]
+            - paragraph [ref=e40]: This template comes pre-wired with visual editing, a blog system, navigation management, SEO tooling, URL redirects, and a themeable component library — all out of the box. Open the Builder.io editor to start customizing, or explore the code to understand how everything fits together.
+          - img "Builder.io template site preview" [ref=e43]
+        - generic [ref=e48]:
+          - heading "Frequently Asked Questions" [level=2] [ref=e49]
+          - generic [ref=e50]:
+            - button "What is this template?" [ref=e51] [cursor=pointer]:
+              - generic [ref=e52]: What is this template?
+              - img [ref=e54]
+            - region "What is this template?":
+              - paragraph [ref=e60]: This is a production-ready Next.js App Router starter integrated with Builder.io for visual content editing. It includes a blog system, site-context for global settings, navigation management, URL redirect rules, and a shared component library built with Tailwind CSS.
+          - generic [ref=e61]:
+            - button "How do I edit this page visually?" [ref=e62] [cursor=pointer]:
+              - generic [ref=e63]: How do I edit this page visually?
+              - img [ref=e65]
+            - region "How do I edit this page visually?":
+              - paragraph [ref=e71]:
+                - text: Open your Builder.io space and navigate to
+                - strong [ref=e72]: Pages
+                - text: . Click the
+                - emphasis [ref=e73]: Home
+                - text: entry to open it in the visual editor. From there you can drag-and-drop components, edit text inline, and publish changes without touching code.
+          - generic [ref=e74]:
+            - button "How do I add a new page?" [ref=e75] [cursor=pointer]:
+              - generic [ref=e76]: How do I add a new page?
+              - img [ref=e78]
+            - region "How do I add a new page?":
+              - paragraph [ref=e84]:
+                - text: In Builder.io, go to
+                - strong [ref=e85]: Pages → New Entry
+                - text: . Set the URL path (e.g.
+                - code [ref=e86]: /about
+                - text: ), add your components, and publish. The Next.js catch-all route (
+                - code [ref=e87]: "[[...page]]"
+                - text: ) automatically serves every published page entry.
+          - generic [ref=e88]:
+            - button "How do I add my own components?" [ref=e89] [cursor=pointer]:
+              - generic [ref=e90]: How do I add my own components?
+              - img [ref=e92]
+            - region "How do I add my own components?":
+              - paragraph [ref=e98]:
+                - text: Create a folder under
+                - code [ref=e99]: "packages/components/components/{category}/{Name}/"
+                - text: with an
+                - code [ref=e100]: index.tsx
+                - text: and a
+                - code [ref=e101]: "{Name}.builder.registration.tsx"
+                - text: . Register it in the matching
+                - code [ref=e102]: "registry/{category}.ts"
+                - text: barrel and add it to an insert menu. Run
+                - code [ref=e103]: /new-component
+                - text: in Claude Code to scaffold everything automatically.
+          - generic [ref=e104]:
+            - button "How do I manage the header and footer navigation?" [ref=e105] [cursor=pointer]:
+              - generic [ref=e106]: How do I manage the header and footer navigation?
+              - img [ref=e108]
+            - region "How do I manage the header and footer navigation?":
+              - paragraph [ref=e114]:
+                - text: Navigation menus are stored in the
+                - strong [ref=e115]: navigation
+                - text: data model in Builder.io. Edit the
+                - emphasis [ref=e116]: primary-navigation
+                - text: entry to update the header menu and the
+                - emphasis [ref=e117]: footer-navigation
+                - text: entry for the footer. Changes publish instantly without a redeploy.
+          - generic [ref=e118]:
+            - button "How do I set up URL redirects?" [ref=e119] [cursor=pointer]:
+              - generic [ref=e120]: How do I set up URL redirects?
+              - img [ref=e122]
+            - region "How do I set up URL redirects?":
+              - paragraph [ref=e128]:
+                - text: Open the
+                - strong [ref=e129]: url-redirect
+                - text: data model in Builder.io and edit the
+                - emphasis [ref=e130]: redirects
+                - text: entry. Add rows with
+                - emphasis [ref=e131]: urlFrom
+                - text: ","
+                - emphasis [ref=e132]: urlTo
+                - text: ", and whether it is permanent (308) or temporary (307). Redirect rules are applied by Next.js on the next deploy."
+    - contentinfo [ref=e133]:
+      - generic [ref=e135]:
+        - link "Company Logo Image" [ref=e136] [cursor=pointer]:
+          - /url: /
+          - img "Company Logo Image" [ref=e138]
+        - navigation [ref=e140]:
+          - generic [ref=e141]:
+            - link "Terms of Service" [ref=e143] [cursor=pointer]:
+              - /url: /terms
+            - link "Privacy Policy" [ref=e145] [cursor=pointer]:
+              - /url: /privacy
+            - link "Contact Us" [ref=e147] [cursor=pointer]:
+              - /url: /contact
+        - generic [ref=e148]: © 2026 Builder App Template. All rights reserved.
+  - button "Open Next.js Dev Tools" [ref=e154] [cursor=pointer]:
+    - img [ref=e155]

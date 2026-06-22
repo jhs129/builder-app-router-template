@@ -3,7 +3,7 @@ import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 import { fetchOneEntry, fetchEntries } from "@builder.io/sdk-react";
 import { Header, Footer, PageSchema, buildPageMetadata } from "@repo/components";
-import type { SiteContext } from "@repo/types";
+import type { Navigation, SiteContext } from "@repo/types";
 import { BUILDER_API_KEY, getSiteContext } from "../../lib/builder";
 import {
   resolvePageParams,
@@ -144,7 +144,7 @@ export default async function Page({ params, searchParams }: PageRouteProps) {
 
   return (
     <div className="flex flex-col min-h-screen">
-      <Header navigation={page?.data?.headerNavigation1?.value} />
+      <Header navigation={site?.data?.headerNavigation1?.value as Navigation | undefined} />
       <main id="main-content" className="flex-grow" role="main">
         {site && (
           <PageSchema

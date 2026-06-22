@@ -24,10 +24,10 @@ pnpm install
 Run the interactive setup from the repo root:
 
 ```bash
-pnpm run setup
+pnpm configure
 ```
 
-> Use `pnpm run setup` — bare `pnpm setup` is a reserved pnpm built-in.
+> Use `pnpm configure`, not `pnpm setup` — `pnpm setup` is a reserved pnpm built-in that configures the shell environment.
 
 It will:
 
@@ -37,7 +37,7 @@ It will:
 
 ### Provision Builder.io models
 
-`pnpm run setup` does this for you; run it directly when you only need to (re)seed models.
+`pnpm configure` does this for you; run it directly when you only need to (re)seed models.
 
 The app reads models that don't exist in a brand-new Builder space:
 
@@ -82,7 +82,7 @@ This runs at **build time** — redirect changes in Builder take effect on the n
 
 | Command | Description |
 | --- | --- |
-| `pnpm run setup` | Guided first-run setup: API keys, optional app rename, Builder provisioning |
+| `pnpm configure` | Guided first-run setup: API keys, optional app rename, Builder provisioning |
 | `pnpm dev` | Start the development server (port 3000) |
 | `pnpm --filter gacore init:builder` | Provision the `site-context`, `article`, and `url-redirect` models in a fresh Builder space |
 | `pnpm build` | Build all apps except Storybook |
@@ -110,7 +110,7 @@ This template ships a suite of Claude Code slash commands under
 `.claude/commands/` (PR creation, PR feedback, Jira grooming and dev pipeline,
 solution review, build fixes, and component scaffolding). They read per-project
 values — Jira project key, cloud ID, base URL, and Vercel project name — from
-`.claude/project-config.md`, which `pnpm setup` populates. If you skip Jira
+`.claude/project-config.md`, which `pnpm configure` populates. If you skip Jira
 during setup, the Jira-aware commands simply omit their Jira steps.
 
 Notably, **`/new-component`** scaffolds a new component following the
