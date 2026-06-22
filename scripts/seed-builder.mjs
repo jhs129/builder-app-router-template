@@ -379,7 +379,7 @@ const PRIMARY_NAV_DATA = {
       ],
     },
     {
-      text: "Blog",
+      text: "Blogs",
       href: "/blogs",
       level2: [
         { text: "Hello World", href: "/blogs/hello-world" },
