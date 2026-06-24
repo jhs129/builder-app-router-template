@@ -34,6 +34,7 @@ export const INSERT_MENUS = {
       { name: "Box" },
       { name: "Columns" },
       { name: "ImageTestimonial" },
+      { name: "Breadcrumb" },
     ],
   } as InsertMenuConfig,
 

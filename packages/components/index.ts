@@ -15,6 +15,7 @@ export * from './components/ui/DesignKitOverview';
 export * from './components/ui/DynamicLink';
 export * from './components/ui/Headline';
 export * from './components/ui/NotFoundContent';
+export * from './components/ui/Breadcrumb';
 
 export * from './components/cta/CardImageCTA';
 export * from './components/cta/TileCTA';
