@@ -26,7 +26,7 @@ const Breadcrumb: FC<BreadcrumbProps> = ({
       aria-label="Breadcrumb"
       className={`w-full bg-theme-bg text-theme-text px-6 md:px-12 lg:px-16 py-4 box-border ${className}`}
     >
-      <ol className="w-full max-width-content mx-auto flex flex-row flex-wrap items-center gap-2 m-0 p-0 list-none text-sm">
+      <ol role="list" className="w-full max-width-content mx-auto flex flex-row flex-wrap items-center gap-2 m-0 p-0 list-none text-sm">
         {items.map((item, i) => {
           const isLast = i === items.length - 1;
           return (
