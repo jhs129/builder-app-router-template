@@ -141,6 +141,19 @@ export interface Product extends Content {
   };
 }
 
+export interface AddressData {
+  address1: string;
+  address2?: string;
+  city: string;
+  state?: string;
+  postalCode?: string;
+  country?: string;
+}
+
+export interface Address extends Content {
+  data: AddressData;
+}
+
 export interface SiteContext extends Content {
   meta: {
     shopifyDomain: string;
@@ -152,13 +165,7 @@ export interface SiteContext extends Content {
     logo: string;
     organization: {
       name: string;
-      address: {
-        city: string;
-        address1: string;
-        postalCode: string;
-        state: string;
-        country: string;
-      };
+      address: AddressData;
       description: string;
     };
     contact: {
@@ -187,15 +194,24 @@ export interface Location extends Content {
     type: "Place" | "Virtual";
     url: string;
     images: [{ image: string, caption: string }];
-    address: {
-      address1: string;
-      address2: string;
-      city: string;
-      state: string;
-      postalCode: string;
-      country: string;
-    };
+    address: AddressData;
   };
+}
+
+export interface EventData {
+  handle: string;
+  title: string;
+  subtitle?: string;
+  description?: string;
+  image: string;
+  startDate: number;
+  endDate: number;
+  address?: AddressData;
+  blocks: any[];
+}
+
+export interface Event extends Content {
+  data: EventData;
 }
 
 // Re-export design-kit interfaces for backward compatibility
