@@ -18,7 +18,7 @@ interface TileContentProps
   eyebrowLevel?: "h5" | "h6";
   subheadline?: string;
   subheadlineLevel?: "h2" | "h3" | "h4" | "h5" | "h6";
-  content: string;
+  content?: string;
   children?: ReactNode;
 }
 
@@ -29,7 +29,7 @@ const TileContent: FC<TileContentProps> = ({
   subheadline,
   subheadlineLevel,
   isHero = false,
-  content,
+  content = "",
   alignment = "center",
   theme = "light",
   inheritTheme = false,

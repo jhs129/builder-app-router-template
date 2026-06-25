@@ -24,10 +24,6 @@ const meta: Meta<typeof TileContent> = {
     maskOpacity: {
       control: { type: "range", min: 0, max: 1, step: 0.1 },
     },
-    eyebrowLevel: {
-      control: { type: "select" },
-      options: ["h5", "h6"],
-    },
     subheadlineLevel: {
       control: { type: "select" },
       options: ["h2", "h3", "h4", "h5", "h6"],
@@ -191,7 +187,6 @@ export const RichTextContent: Story = {
 export const WithEyebrowAndSubheadline: Story = {
   args: {
     eyebrow: "Featured Course",
-    eyebrowLevel: "h6",
     headline: "Master Meditation",
     subheadline: "Transform Your Mind in 30 Days",
     subheadlineLevel: "h3",
