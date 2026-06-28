@@ -31,6 +31,12 @@ export const registration: RegisteredComponent[] = [
             hideFromUI: true,
             helperText: "The content blocks for this accordion item",
           },
+          {
+            name: "schemaAnswer",
+            type: "text",
+            helperText:
+              "Plain-text answer used for FAQ schema.org structured data. Only required when isFAQ is enabled.",
+          },
         ],
         defaultValue: [
           {
@@ -100,6 +106,13 @@ export const registration: RegisteredComponent[] = [
         defaultValue: false,
         helperText:
           "Keep all accordion items always expanded (no collapse functionality)",
+      },
+      {
+        name: "isFAQ",
+        type: "boolean",
+        defaultValue: false,
+        helperText:
+          "Emit a FAQPage schema.org JSON-LD script for this accordion. Fill in the schemaAnswer field on each item to provide the structured-data answer text.",
       },
     ],
     defaultStyles: {

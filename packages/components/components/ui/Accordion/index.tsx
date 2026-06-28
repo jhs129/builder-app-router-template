@@ -6,11 +6,12 @@ import {
   type BuilderContextInterface,
 } from "@builder.io/sdk-react";
 import { useState, useRef, useEffect, useId } from "react";
-import { Themeable, getThemeClasses, Stylable } from "@repo/types";
+import { Themeable, getThemeClasses, Stylable, FAQPage } from "@repo/types";
 
 export interface AccordionItem {
   headline: string;
   content: { blocks: BuilderBlock[] };
+  schemaAnswer?: string;
 }
 
 export interface AccordionProps extends Themeable, Stylable {
@@ -25,6 +26,7 @@ export interface AccordionProps extends Themeable, Stylable {
   groupHeadlineLevel?: "h2" | "h3" | "h4" | "h5" | "h6";
   body?: string;
   alwaysExpanded?: boolean;
+  isFAQ?: boolean;
 }
 
 export const Accordion: React.FC<AccordionProps> = ({
@@ -41,6 +43,7 @@ export const Accordion: React.FC<AccordionProps> = ({
   groupHeadlineLevel = "h4",
   body,
   alwaysExpanded = false,
+  isFAQ = false,
   className,
 }) => {
   const animationDuration = 300; // Best practice: 300ms for smooth UX
@@ -211,6 +214,22 @@ export const Accordion: React.FC<AccordionProps> = ({
 
   const themeClasses = inheritTheme ? "" : getThemeClasses(theme);
 
+  const faqSchema: FAQPage | null =
+    isFAQ && groups.length > 0
+      ? {
+          "@context": "https://schema.org",
+          "@type": "FAQPage",
+          mainEntity: groups.map((group) => ({
+            "@type": "Question",
+            name: group.headline,
+            acceptedAnswer: {
+              "@type": "Answer",
+              text: group.schemaAnswer ?? "",
+            },
+          })),
+        }
+      : null;
+
   return (
     <div className={`accordion ${themeClasses} w-full`}>
       <div className="container">
@@ -230,6 +249,14 @@ export const Accordion: React.FC<AccordionProps> = ({
         )}
         {groups.map(renderAccordionItem)}
       </div>
+      {faqSchema && (
+        <script
+          type="application/ld+json"
+          dangerouslySetInnerHTML={{
+            __html: JSON.stringify(faqSchema).replace(/<\//g, "<\\/"),
+          }}
+        />
+      )}
     </div>
   );
 };

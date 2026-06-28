@@ -21,10 +21,16 @@ export interface ListItem {
   "@type": "ListItem";
   position: number;
   name: string;
-  item: string;
+  item?: string;
 }
 
 export interface BreadcrumbList {
+  "@type": "BreadcrumbList";
+  itemListElement: ListItem[];
+}
+
+export interface BreadcrumbListSchema {
+  "@context": "https://schema.org";
   "@type": "BreadcrumbList";
   itemListElement: ListItem[];
 }
@@ -249,4 +255,56 @@ export interface EventSchema {
   };
   maximumAttendeeCapacity?: number;
   remainingAttendeeCapacity?: number;
+}
+
+export interface FAQPage {
+  "@context": "https://schema.org";
+  "@type": "FAQPage";
+  mainEntity: Array<{
+    "@type": "Question";
+    name: string;
+    acceptedAnswer: {
+      "@type": "Answer";
+      text: string;
+    };
+  }>;
+}
+
+export interface PersonSchema {
+  "@context": "https://schema.org";
+  "@type": "Person";
+  "@id"?: string;
+  name: string;
+  jobTitle?: string;
+  description?: string;
+  image?: string;
+  url?: string;
+  email?: string;
+  telephone?: string;
+  sameAs?: string[];
+  address?: {
+    "@type": "PostalAddress";
+    streetAddress?: string;
+    addressLocality?: string;
+    addressRegion?: string;
+    postalCode?: string;
+    addressCountry?: string;
+  };
+  affiliation?: {
+    "@type": "Organization";
+    name: string;
+    url?: string;
+  };
+  worksFor?: {
+    "@type": "Organization";
+    name: string;
+    url?: string;
+  };
+  alumniOf?: Array<{
+    "@type": "Organization";
+    name: string;
+    url?: string;
+  }>;
+  knowsAbout?: string[];
+  expertise?: string[];
 }

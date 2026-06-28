@@ -6,6 +6,11 @@ export const registration: RegisteredComponent[] = [
   {
     component: Breadcrumb,
     name: "Breadcrumb",
+    defaults: {
+      bindings: {
+        "component.options.items": "state.pageContext.breadcrumbs",
+      },
+    },
     ...withImage(),
     inputs: [
       ...themeableInputs,

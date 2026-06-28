@@ -32,6 +32,7 @@ export interface NavigationData {
 export interface Metadata {
   description?: string;
   keywords?: string[];
+  breadcrumbTitle?: string;
 }
 
 export interface SocialNetwork {
