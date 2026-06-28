@@ -73,23 +73,20 @@ If any of these fail, stop and tell the user to fix the errors before creating t
 
 ## Step 4: Code Review
 
-Get all changes on this branch:
-```bash
-git diff main...HEAD --name-only
-git diff main...HEAD
+Run the workflow-backed code review at high effort:
+
+```
+Workflow({ name: "code-review", args: "high" })
 ```
 
-Dispatch a `pr-review-toolkit:code-reviewer` subagent. Pass it:
-- The full output of `git diff main...HEAD`
-- The changed file list from `git diff main...HEAD --name-only`
-- This context: "Next.js 16 App Router project on a Turborepo monorepo (apps/, packages/) using the Builder.io Gen 2 SDK (@builder.io/sdk-react) and pnpm. Key conventions in CLAUDE.md and packages/components/COMPONENT_PATTERN.md: each component is self-contained in its own folder packages/components/components/{category}/{Name}/ with index.tsx (component + Props), a co-located {Name}.stories.tsx, and — only if registered with Builder.io — a {Name}.builder.registration.tsx that exports registration: RegisteredComponent[] using withImage() and shared input bundles from registry/shared.ts; registrations are concatenated by thin registry/{category}.ts barrels and the app layer (apps/app-0/registry/) owns the final component list and insert menus; use Tailwind tokens (never hardcode hex or arbitrary bg-[#xxx]); components over 100 lines are split into sibling files in the same folder; default placehold.co images use a .png extension; use pnpm."
+This fans out 30+ agents across multiple review dimensions and an adversarial verify pass. Wait for the task notification; findings arrive ranked by severity.
 
 **If no blockers found:** Proceed to Step 5.
 
 **If blockers found:**
 1. Fix every issue that can be resolved without human judgment: naming, style, missing error handling, CLAUDE.md convention violations, type issues.
 2. Run: `pnpm build && pnpm lint` — fix any errors before continuing.
-3. Re-dispatch the `pr-review-toolkit:code-reviewer` subagent on the updated diff.
+3. Re-run `Workflow({ name: "code-review", args: "high" })` on the updated diff.
 4. If clean → proceed to Step 5.
 5. If questions remain that require human judgment:
    - If a Jira ticket was found in Step 2:

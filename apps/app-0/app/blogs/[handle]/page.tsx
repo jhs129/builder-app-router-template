@@ -169,6 +169,15 @@ export default async function BlogPage({
               content={article}
               model="article"
               locale={locale}
+              data={{
+                pageContext: {
+                  breadcrumbs: [
+                    { label: "Home", href: origin || "" },
+                    { label: "Blog", href: `${origin || ""}/blogs` },
+                    { label: article?.data?.title || "", href: `${origin || ""}/blogs/${handle}` },
+                  ],
+                },
+              }}
             />
           </article>
         </ThemeProvider>

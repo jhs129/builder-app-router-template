@@ -2,7 +2,7 @@ import React from "react";
 import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 import { fetchOneEntry, fetchEntries } from "@builder.io/sdk-react";
-import { Header, Footer, PageSchema, buildPageMetadata } from "@repo/components";
+import { Header, Footer, PageSchema, buildPageMetadata, FAQSchemaData } from "@repo/components";
 import type { Navigation, SiteContext } from "@repo/types";
 import { BUILDER_API_KEY, getSiteContext } from "../../lib/builder";
 import {
@@ -49,17 +49,21 @@ async function buildBreadcrumbTrail(
           currentPage?.data?.title ||
           toLabel(segment);
       } else {
-        const ancestorPage = await fetchOneEntry({
-          model: "page",
-          apiKey: BUILDER_API_KEY,
-          userAttributes: { urlPath: segmentPath },
-          fields: "data.title,data.metadata",
-          options: { noTargeting: true },
-        });
-        label =
-          ancestorPage?.data?.metadata?.breadcrumbTitle ||
-          ancestorPage?.data?.title ||
-          toLabel(segment);
+        try {
+          const ancestorPage = await fetchOneEntry({
+            model: "page",
+            apiKey: BUILDER_API_KEY,
+            userAttributes: { urlPath: segmentPath },
+            fields: "data.title,data.metadata",
+            options: { noTargeting: true },
+          });
+          label =
+            ancestorPage?.data?.metadata?.breadcrumbTitle ||
+            ancestorPage?.data?.title ||
+            toLabel(segment);
+        } catch {
+          label = toLabel(segment);
+        }
       }
 
       return { label, href: `${siteUrl}${segmentPath}` };
@@ -67,6 +71,25 @@ async function buildBreadcrumbTrail(
   );
 
   return [{ label: "Home", href: siteUrl }, ...resolvedSegments];
+}
+
+function extractFaqItems(blocks: any[]): Array<{ name: string; text: string }> {
+  if (!Array.isArray(blocks)) return [];
+  const items: Array<{ name: string; text: string }> = [];
+  for (const block of blocks) {
+    if (block?.component?.name === "Accordion" && block?.component?.options?.isFAQ) {
+      const groups: any[] = block.component.options.groups || [];
+      for (const group of groups) {
+        if (group.headline && group.schemaAnswer) {
+          items.push({ name: group.headline, text: group.schemaAnswer });
+        }
+      }
+    }
+    if (block?.children?.length) {
+      items.push(...extractFaqItems(block.children));
+    }
+  }
+  return items;
 }
 
 function shouldExcludePath(url: string): boolean {
@@ -161,6 +184,7 @@ export default async function Page({ params, searchParams }: PageRouteProps) {
   const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || "";
 
   const breadcrumbTrail = await buildBreadcrumbTrail(urlPath, page, siteUrl);
+  const faqItems = extractFaqItems(page?.data?.blocks || []);
   const breadcrumbSchema =
     breadcrumbTrail.length > 1
       ? breadcrumbTrail.map((c, i) => ({
@@ -221,6 +245,7 @@ export default async function Page({ params, searchParams }: PageRouteProps) {
             breadcrumb={breadcrumbSchema}
           />
         )}
+        {faqItems.length > 0 && <FAQSchemaData items={faqItems} />}
         <RenderBuilderContent
           content={page}
           model="page"

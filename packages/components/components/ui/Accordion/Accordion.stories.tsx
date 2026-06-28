@@ -152,6 +152,36 @@ export const SingleItem: Story = {
 };
 
 
+export const FaqAccordion: Story = {
+  args: {
+    headline: "Frequently Asked Questions",
+    headlineLevel: "h2",
+    theme: "light",
+    alignment: "left",
+    isFAQ: true,
+    groups: [
+      {
+        headline: "What programs does Georgia CORE offer?",
+        schemaAnswer:
+          "Georgia CORE offers a range of oncology research and education programs including clinical trials, physician education, and patient navigation services.",
+        content: { blocks: [] },
+      },
+      {
+        headline: "How can I participate in a clinical trial?",
+        schemaAnswer:
+          "You can participate in a clinical trial by speaking with your oncologist or contacting Georgia CORE directly at our website or by phone.",
+        content: { blocks: [] },
+      },
+      {
+        headline: "Is Georgia CORE a nonprofit organization?",
+        schemaAnswer:
+          "Yes, Georgia CORE is a 501(c)(3) nonprofit organization dedicated to improving cancer care for all Georgians.",
+        content: { blocks: [] },
+      },
+    ],
+  },
+};
+
 export const AccessibilityOptimized: Story = {
   args: {
     headline: "Accessibility Features",

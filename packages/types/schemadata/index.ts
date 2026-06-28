@@ -21,14 +21,13 @@ export interface ListItem {
   "@type": "ListItem";
   position: number;
   name: string;
-  item?: string;
+  item: string;
 }
 
 export interface BreadcrumbList {
   "@type": "BreadcrumbList";
   itemListElement: ListItem[];
 }
-
 
 export interface WebPageSchema {
   "@context": "https://schema.org";

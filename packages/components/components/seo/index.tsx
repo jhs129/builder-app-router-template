@@ -10,3 +10,5 @@ export { WebPageSchemaData } from "./WebPageSchemaData";
 export { OrganizationSchemaData } from "./OrganizationSchemaData";
 export { ArticleSchemaData } from "./ArticleSchemaData";
 export { EventSchemaData } from "./EventSchemaData";
+export { FAQSchemaData } from "./FAQSchemaData";
+export type { FAQSchemaDataProps, FAQSchemaDataItem } from "./FAQSchemaData";
