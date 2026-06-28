@@ -10,8 +10,18 @@ Run these in parallel:
 ```bash
 git branch --show-current
 git status
-git log --oneline main..HEAD
-git diff main...HEAD --stat
+git log --oneline HEAD
+```
+
+**Determine the base branch** from the current branch name:
+- If current branch is `develop` → base = `main` (this is a develop → main release PR)
+- If current branch is `main` → stop and warn: "You are on main. PRs should be from a feature branch or develop."
+- Any other branch → base = `develop` (this is a feature → develop PR)
+
+Once the base is known, run:
+```bash
+git log --oneline <base-branch>..HEAD
+git diff <base-branch>...HEAD --stat
 ```
 
 From the branch name, check whether it matches the Jira ticket pattern: `^([a-zA-Z]+-\d+)(-.*)?$`
@@ -21,7 +31,9 @@ Examples that match:
 - `sma-3` → ticket key `SMA-3`
 - `feature/sma-5-auth` → ticket key `SMA-5`
 
-If no match, skip Jira steps entirely.
+If current branch is `develop`, skip Jira steps entirely (develop → main is a release merge, not a ticket PR).
+
+If any other branch and no Jira match, skip Jira steps entirely.
 
 ---
 
@@ -161,13 +173,13 @@ Structure:
 ## Step 8: Create the PR
 
 ```bash
-gh pr create --title "<title>" --body "$(cat <<'EOF'
+gh pr create --base <base-branch> --title "<title>" --body "$(cat <<'EOF'
 <body>
 EOF
 )"
 ```
 
-Use `--base main` if the base branch is not automatically detected correctly.
+`<base-branch>` is `develop` for feature branches and `main` for the `develop` branch (always pass it explicitly — never rely on the repo default).
 
 ---
 
