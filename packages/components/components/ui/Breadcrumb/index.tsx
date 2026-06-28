@@ -1,7 +1,7 @@
 import React, { FC } from "react";
 import Link from "next/link";
 import { ThemeProvider } from "../../common/ThemeProvider";
-import { Themeable, BreadcrumbListSchema } from "@repo/types";
+import { Themeable } from "@repo/types";
 
 export interface BreadcrumbTrailItem {
   label: string;
@@ -20,17 +20,6 @@ const Breadcrumb: FC<BreadcrumbProps> = ({
   items = [],
 }) => {
   if (items.length === 0) return null;
-
-  const schema: BreadcrumbListSchema = {
-    "@context": "https://schema.org",
-    "@type": "BreadcrumbList",
-    itemListElement: items.map((item, i) => ({
-      "@type": "ListItem",
-      position: i + 1,
-      name: item.label,
-      ...(item.href ? { item: item.href } : {}),
-    })),
-  };
 
   const content = (
     <nav
@@ -69,29 +58,11 @@ const Breadcrumb: FC<BreadcrumbProps> = ({
     </nav>
   );
 
-  const jsonLd = (
-    <script
-      type="application/ld+json"
-      dangerouslySetInnerHTML={{
-        __html: JSON.stringify(schema).replace(/<\//g, "<\\/"),
-      }}
-    />
-  );
-
-  if (inheritTheme || !theme)
-    return (
-      <>
-        {jsonLd}
-        {content}
-      </>
-    );
+  if (inheritTheme || !theme) return content;
   return (
-    <>
-      {jsonLd}
-      <ThemeProvider theme={theme} inheritTheme={false}>
-        {content}
-      </ThemeProvider>
-    </>
+    <ThemeProvider theme={theme} inheritTheme={false}>
+      {content}
+    </ThemeProvider>
   );
 };
 

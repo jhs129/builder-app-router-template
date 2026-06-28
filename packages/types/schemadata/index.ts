@@ -29,11 +29,6 @@ export interface BreadcrumbList {
   itemListElement: ListItem[];
 }
 
-export interface BreadcrumbListSchema {
-  "@context": "https://schema.org";
-  "@type": "BreadcrumbList";
-  itemListElement: ListItem[];
-}
 
 export interface WebPageSchema {
   "@context": "https://schema.org";
