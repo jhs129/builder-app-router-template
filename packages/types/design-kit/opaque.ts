@@ -6,7 +6,7 @@ export const opacityInputs = [
     {
       name: "maskOpacity",
       type: "number",
-      defaultValue: 0.3,
+      defaultValue: 0,
       min: 0,
       max: 1,
       step: 0.1,

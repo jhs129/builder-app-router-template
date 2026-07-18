@@ -15,7 +15,6 @@ interface TileContentProps
     Opaque,
     Stylable {
   eyebrow?: string;
-  eyebrowLevel?: "h5" | "h6";
   subheadline?: string;
   subheadlineLevel?: "h2" | "h3" | "h4" | "h5" | "h6";
   content?: string;
@@ -24,7 +23,6 @@ interface TileContentProps
 
 const TileContent: FC<TileContentProps> = ({
   eyebrow,
-  eyebrowLevel,
   headline,
   subheadline,
   subheadlineLevel,
@@ -52,7 +50,9 @@ const TileContent: FC<TileContentProps> = ({
       {/* Content with relative positioning to appear above mask */}
       <div className="relative z-10">
         {eyebrow && hasMeaningfulContent(eyebrow) && (
-          <Headline level={eyebrowLevel} className="mb-2">{eyebrow}</Headline>
+          <p className="text-base font-medium text-theme-heading-alt uppercase tracking-wide">
+            {eyebrow}
+          </p>
         )}
         {/* Title */}
         {headline && <Headline level="h2" isHero={isHero}>{headline}</Headline>}

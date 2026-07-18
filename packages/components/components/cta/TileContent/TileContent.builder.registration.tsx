@@ -30,11 +30,17 @@ export const registration: RegisteredComponent[] = [
       ...themeableInputs,
       ...opacityInputs,
       ...alignableInputs,
+      {
+        name: "eyebrow",
+        type: "string",
+        defaultValue: "[Eyebrow]",
+        helperText: "Optional eyebrow text displayed above the headline in uppercase",
+      },
       ...heroicInputs,
       {
         name: "content",
         type: "richText",
-        required: true,
+        required: false,
         defaultValue:
           "Add your content description here. This supports rich text formatting.",
         helperText: "Main description content (supports HTML formatting)",
