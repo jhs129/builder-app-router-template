@@ -1,4 +1,4 @@
-import React from "react";
+import React, { cache } from "react";
 import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 import { fetchOneEntry, fetchEntries } from "@builder.io/sdk-react";
@@ -16,6 +16,18 @@ import RenderBuilderContent from "../../components/RenderBuilderContent";
 // App Router segment config is statically analyzed and rejects runtime/env
 // expressions. Editors still get instant updates via Builder preview mode.
 export const revalidate = 300;
+
+// Deduplicate the page fetch across generateMetadata and the Page component
+// within the same request render using React.cache().
+const fetchPage = cache(async (urlPath: string, locale: string) =>
+  fetchOneEntry({
+    model: "page",
+    apiKey: BUILDER_API_KEY,
+    userAttributes: { urlPath },
+    enrich: true,
+    locale,
+  })
+);
 
 // Directories / pages that have their own route implementations.
 const EXCLUDED_DIRECTORIES = ["/blogs"];
@@ -129,13 +141,7 @@ export async function generateMetadata({
   const { locale, urlPath } = resolvePageParams(segments);
 
   const [page, siteContext] = await Promise.all([
-    fetchOneEntry({
-      model: "page",
-      apiKey: BUILDER_API_KEY,
-      userAttributes: { urlPath },
-      enrich: true,
-      locale,
-    }),
+    fetchPage(urlPath, locale),
     getSiteContext(locale),
   ]);
 
@@ -162,13 +168,7 @@ export default async function Page({ params, searchParams }: PageRouteProps) {
   const { locale, urlPath } = resolvePageParams(segments);
 
   const [page, siteContext] = await Promise.all([
-    fetchOneEntry({
-      model: "page",
-      apiKey: BUILDER_API_KEY,
-      userAttributes: { urlPath },
-      enrich: true,
-      locale,
-    }),
+    fetchPage(urlPath, locale),
     getSiteContext(locale),
   ]);
 

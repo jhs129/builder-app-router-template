@@ -4,6 +4,9 @@ import { DefaultHeader, Footer, NotFoundContent } from "@repo/components";
 import { BUILDER_API_KEY } from "../lib/builder";
 import RenderBuilderContent from "../components/RenderBuilderContent";
 
+// 404s should not re-render on every request — revalidate daily.
+export const revalidate = 86400;
+
 export default async function NotFound() {
   const page404 = await fetchOneEntry({
     model: "page",
