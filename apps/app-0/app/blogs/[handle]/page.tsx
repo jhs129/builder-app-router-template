@@ -163,7 +163,7 @@ export default async function BlogPage({
               inheritTheme={false}
             />
           </Banner100>
-          <article className="container mx-auto px-4 py-8">
+          <article className="w-full max-w-[1200px] mx-auto px-6 md:px-12 lg:px-16 py-8">
             <h6>Published: {publishedDate}</h6>
             <RenderBuilderContent
               content={article}
