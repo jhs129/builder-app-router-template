@@ -6,6 +6,9 @@
   "author": "JHS Digital Consulting, LLC (https://www.jhsdigitalconsulting.com)",
   "homepage": "https://www.jhsdigitalconsulting.com",
   "packageManager": "pnpm@9.15.4",
+  "engines": {
+    "node": "22.x"
+  },
   "scripts": {
     "configure": "node scripts/setup.mjs",
     "build": "turbo run build --filter=!storybook-app",
