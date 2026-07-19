@@ -1,8 +1,8 @@
-import React from "react";
+import React, { cache } from "react";
 import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 import { fetchOneEntry, fetchEntries } from "@builder.io/sdk-react";
-import { Header, Footer, PageSchema, buildPageMetadata } from "@repo/components";
+import { Header, Footer, PageSchema, buildPageMetadata, FAQSchemaData } from "@repo/components";
 import type { Navigation, SiteContext } from "@repo/types";
 import { BUILDER_API_KEY, getSiteContext } from "../../lib/builder";
 import {
@@ -17,33 +17,91 @@ import RenderBuilderContent from "../../components/RenderBuilderContent";
 // expressions. Editors still get instant updates via Builder preview mode.
 export const revalidate = 300;
 
+// Deduplicate the page fetch across generateMetadata and the Page component
+// within the same request render using React.cache().
+const fetchPage = cache(async (urlPath: string, locale: string) =>
+  fetchOneEntry({
+    model: "page",
+    apiKey: BUILDER_API_KEY,
+    userAttributes: { urlPath },
+    enrich: true,
+    locale,
+  })
+);
+
 // Directories / pages that have their own route implementations.
 const EXCLUDED_DIRECTORIES = ["/blogs"];
 const STANDALONE_PAGES = ["/404"];
 
-// Build a BreadcrumbList trail (Home + one entry per path segment) from the
-// resolved url path. Returns undefined for the site root, which has no trail.
-function buildBreadcrumb(urlPath: string, siteUrl: string) {
+const toLabel = (segment: string) =>
+  segment
+    .replace(/[-_]/g, " ")
+    .replace(/\b\w/g, (char) => char.toUpperCase());
+
+// Build a breadcrumb trail (Home + one entry per path segment), resolving each
+// label from the page model's breadcrumbTitle → title → slug fallback chain.
+// The current page entry is reused directly; ancestors are fetched in parallel.
+async function buildBreadcrumbTrail(
+  urlPath: string,
+  currentPage: any,
+  siteUrl: string
+): Promise<{ label: string; href: string }[]> {
   const segments = urlPath.split("/").filter(Boolean);
-  if (segments.length === 0) return undefined;
+  if (segments.length === 0) return [];
 
-  const toLabel = (segment: string) =>
-    segment
-      .replace(/[-_]/g, " ")
-      .replace(/\b\w/g, (char) => char.toUpperCase());
+  const resolvedSegments = await Promise.all(
+    segments.map(async (segment, index) => {
+      const segmentPath = "/" + segments.slice(0, index + 1).join("/");
+      const isLast = index === segments.length - 1;
 
-  const crumbs = [{ position: 1, name: "Home", item: siteUrl }];
-  let path = "";
-  segments.forEach((segment, index) => {
-    path += `/${segment}`;
-    crumbs.push({
-      position: index + 2,
-      name: toLabel(segment),
-      item: `${siteUrl}${path}`,
-    });
-  });
+      let label: string;
+      if (isLast) {
+        label =
+          currentPage?.data?.metadata?.breadcrumbTitle ||
+          currentPage?.data?.title ||
+          toLabel(segment);
+      } else {
+        try {
+          const ancestorPage = await fetchOneEntry({
+            model: "page",
+            apiKey: BUILDER_API_KEY,
+            userAttributes: { urlPath: segmentPath },
+            fields: "data.title,data.metadata",
+            options: { noTargeting: true },
+          });
+          label =
+            ancestorPage?.data?.metadata?.breadcrumbTitle ||
+            ancestorPage?.data?.title ||
+            toLabel(segment);
+        } catch {
+          label = toLabel(segment);
+        }
+      }
 
-  return crumbs;
+      return { label, href: `${siteUrl}${segmentPath}` };
+    })
+  );
+
+  return [{ label: "Home", href: siteUrl }, ...resolvedSegments];
+}
+
+function extractFaqItems(blocks: any[]): Array<{ name: string; text: string }> {
+  if (!Array.isArray(blocks)) return [];
+  const items: Array<{ name: string; text: string }> = [];
+  for (const block of blocks) {
+    if (block?.component?.name === "Accordion" && block?.component?.options?.isFAQ) {
+      const groups: any[] = block.component.options.groups || [];
+      for (const group of groups) {
+        if (group.headline && group.schemaAnswer) {
+          items.push({ name: group.headline, text: group.schemaAnswer });
+        }
+      }
+    }
+    if (block?.children?.length) {
+      items.push(...extractFaqItems(block.children));
+    }
+  }
+  return items;
 }
 
 function shouldExcludePath(url: string): boolean {
@@ -83,13 +141,7 @@ export async function generateMetadata({
   const { locale, urlPath } = resolvePageParams(segments);
 
   const [page, siteContext] = await Promise.all([
-    fetchOneEntry({
-      model: "page",
-      apiKey: BUILDER_API_KEY,
-      userAttributes: { urlPath },
-      enrich: true,
-      locale,
-    }),
+    fetchPage(urlPath, locale),
     getSiteContext(locale),
   ]);
 
@@ -116,13 +168,7 @@ export default async function Page({ params, searchParams }: PageRouteProps) {
   const { locale, urlPath } = resolvePageParams(segments);
 
   const [page, siteContext] = await Promise.all([
-    fetchOneEntry({
-      model: "page",
-      apiKey: BUILDER_API_KEY,
-      userAttributes: { urlPath },
-      enrich: true,
-      locale,
-    }),
+    fetchPage(urlPath, locale),
     getSiteContext(locale),
   ]);
 
@@ -136,6 +182,17 @@ export default async function Page({ params, searchParams }: PageRouteProps) {
   const site = siteContext as SiteContext | null;
 
   const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || "";
+
+  const breadcrumbTrail = await buildBreadcrumbTrail(urlPath, page, siteUrl);
+  const faqItems = extractFaqItems(page?.data?.blocks || []);
+  const breadcrumbSchema =
+    breadcrumbTrail.length > 1
+      ? breadcrumbTrail.map((c, i) => ({
+          position: i + 1,
+          name: c.label,
+          item: c.href,
+        }))
+      : undefined;
 
   const toIso = (timestamp?: number) =>
     timestamp ? new Date(timestamp).toISOString() : undefined;
@@ -176,7 +233,9 @@ export default async function Page({ params, searchParams }: PageRouteProps) {
                       telephone: site.data.contact.telephone,
                       email: site.data.contact.email,
                       areaServed: site.data.contact.areaServed,
-                      availableLanguage: site.data.contact.availableLanguages,
+                      availableLanguage: site.data.contact.availableLanguages?.map(
+                        (lang) => lang.language
+                      ),
                     },
                   ]
                 : undefined
@@ -185,14 +244,15 @@ export default async function Page({ params, searchParams }: PageRouteProps) {
             keywords={page?.data?.metadata?.keywords}
             publishedDate={toIso(page?.firstPublished) || toIso(page?.lastUpdated)}
             modifiedDate={toIso(page?.lastUpdated)}
-            breadcrumb={buildBreadcrumb(urlPath, siteUrl)}
+            breadcrumb={breadcrumbSchema}
           />
         )}
+        {faqItems.length > 0 && <FAQSchemaData items={faqItems} />}
         <RenderBuilderContent
           content={page}
           model="page"
           locale={locale}
-          data={{ siteContext: site, lastUpdatedDate }}
+          data={{ siteContext: site, lastUpdatedDate, pageContext: { breadcrumbs: breadcrumbTrail } }}
         />
       </main>
       <Footer navigation={page?.data?.footerNavigation?.value} />

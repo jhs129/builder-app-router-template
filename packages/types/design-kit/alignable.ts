@@ -21,7 +21,7 @@ export const alignableInputs = [
     {
       name: "alignment",
       type: "string",
-      defaultValue: "center",
+      defaultValue: "left",
       enum: textAlignments,
       helperText: "Content alignment within the component",
     },

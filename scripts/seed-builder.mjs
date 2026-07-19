@@ -244,7 +244,7 @@ const DEFAULT_DATA = {
     telephone: "+1-555-555-5555",
     email: "hello@example.com",
     areaServed: "US",
-    availableLanguages: ["English"],
+    availableLanguages: [{ language: "English" }],
   },
   socialNetworks: [
     { name: "Twitter", href: "https://twitter.com" },
@@ -283,6 +283,10 @@ const METADATA_MODEL_BODY = {
     }),
     field("keywords", "Tags", {
       helperText: "SEO keywords for the page.",
+    }),
+    field("breadcrumbTitle", "text", {
+      helperText:
+        "Short label to use for this page in breadcrumb trails, overriding the page title.",
     }),
   ],
 };
@@ -1053,6 +1057,19 @@ async function main() {
   // `model`-type field points at it by id, which differs per Builder space.
   const metadataModelId = await ensureModelReturningId(METADATA_MODEL_BODY, models);
   const metaField = metadataField(metadataModelId);
+
+  // A pre-existing metadata model may predate newer SEO fields (e.g.
+  // breadcrumbTitle) — retrofit them so older spaces stay in sync.
+  await ensureModelHasFields(
+    METADATA_MODEL_NAME,
+    [
+      field("breadcrumbTitle", "text", {
+        helperText:
+          "Short label to use for this page in breadcrumb trails, overriding the page title.",
+      }),
+    ],
+    models
+  );
 
   // Give a freshly-created article the metadata field at creation time.
   ARTICLE_MODEL_BODY.fields.push(metaField);

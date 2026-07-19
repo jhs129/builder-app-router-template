@@ -65,3 +65,4 @@ storybook-static/
 # cache directories
 .cache/
 .parcel-cache/
+.playwright-mcp/*.*

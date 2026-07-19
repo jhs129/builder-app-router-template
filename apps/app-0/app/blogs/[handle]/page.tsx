@@ -1,4 +1,4 @@
-import React from "react";
+import React, { cache } from "react";
 import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 import { fetchOneEntry, fetchEntries } from "@builder.io/sdk-react";
@@ -32,15 +32,15 @@ function formatDate(timestamp: number): string {
   });
 }
 
-async function fetchArticle(handle: string, locale: string) {
-  return fetchOneEntry({
+const fetchArticle = cache(async (handle: string, locale: string) =>
+  fetchOneEntry({
     model: "article",
     apiKey: BUILDER_API_KEY,
     query: { "data.handle": handle },
     enrich: true,
     locale,
-  });
-}
+  })
+);
 
 export async function generateStaticParams(): Promise<{ handle: string }[]> {
   const articles = await fetchEntries({
@@ -163,12 +163,21 @@ export default async function BlogPage({
               inheritTheme={false}
             />
           </Banner100>
-          <article className="container mx-auto px-4 py-8">
+          <article className="w-full max-w-[1200px] mx-auto px-6 md:px-12 lg:px-16 py-8">
             <h6>Published: {publishedDate}</h6>
             <RenderBuilderContent
               content={article}
               model="article"
               locale={locale}
+              data={{
+                pageContext: {
+                  breadcrumbs: [
+                    { label: "Home", href: origin || "" },
+                    { label: "Blog", href: `${origin || ""}/blogs` },
+                    { label: article?.data?.title || "", href: `${origin || ""}/blogs/${handle}` },
+                  ],
+                },
+              }}
             />
           </article>
         </ThemeProvider>

@@ -73,15 +73,15 @@ Wait for all subagents to complete, then display the Step 10 Summary with collat
 From the main repo directory, create a dedicated worktree for this ticket:
 
 ```bash
-# Ensure main is up to date
-git fetch origin main
+# Ensure develop is up to date (feature branches base off develop, not main)
+git fetch origin develop
 
 # Derive branch name from ticket key and summary slug
 # e.g., KEY-8 "Accordion Component" → key-8-accordion-component
 BRANCH="<ticket-key-lowercase>-<slug>"
 
-# Create worktree + branch
-git worktree add ../<branch-name> -b <branch-name> origin/main
+# Create worktree + branch from develop
+git worktree add ../<branch-name> -b <branch-name> origin/develop
 ```
 
 All subsequent work for this ticket happens inside `../<branch-name>/`.
@@ -181,6 +181,7 @@ Processed X ticket(s):
 - Always remove the worktree after PR creation — never leave local worktrees around
 - If the build fails, stop and report the errors without creating a PR or removing the worktree (leave it for debugging)
 - Branch naming: `<ticket-key-lowercase>-<short-slug>` — e.g., `key-8-accordion-component`
+- **Gitflow:** Feature branches always base off `develop`, not `main`. The `/pr` command will target `develop` automatically. `develop` merges into `main` via a separate release PR.
 - Project config: read `.claude/project-config.md` for the Jira project key, cloud ID, base URL, and Vercel project name. If **Configured: no**, skip all Jira steps and proceed without them.
 - Main repo root: use `git rev-parse --show-toplevel` if needed
 - Always use `pnpm` as the package manager
