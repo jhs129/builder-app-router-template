@@ -171,7 +171,7 @@ export interface SiteContext extends Content {
     };
     contact: {
       telephone: string;
-      availableLanguages: string[];
+      availableLanguages: { language: string }[];
       email: string;
       areaServed: string;
     };

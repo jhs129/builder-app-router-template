@@ -233,7 +233,9 @@ export default async function Page({ params, searchParams }: PageRouteProps) {
                       telephone: site.data.contact.telephone,
                       email: site.data.contact.email,
                       areaServed: site.data.contact.areaServed,
-                      availableLanguage: site.data.contact.availableLanguages,
+                      availableLanguage: site.data.contact.availableLanguages?.map(
+                        (lang) => lang.language
+                      ),
                     },
                   ]
                 : undefined

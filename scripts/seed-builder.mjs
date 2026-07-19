@@ -244,7 +244,7 @@ const DEFAULT_DATA = {
     telephone: "+1-555-555-5555",
     email: "hello@example.com",
     areaServed: "US",
-    availableLanguages: ["English"],
+    availableLanguages: [{ language: "English" }],
   },
   socialNetworks: [
     { name: "Twitter", href: "https://twitter.com" },
