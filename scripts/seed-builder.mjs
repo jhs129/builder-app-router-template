@@ -106,6 +106,8 @@ const METADATA_MODEL_NAME = "metadata";
 const URL_REDIRECT_MODEL_NAME = "url-redirect";
 // Builder's built-in catch-all page model (not created by this script).
 const PAGE_MODEL_NAME = "page";
+// Builder's built-in symbol model (not created by this script).
+const SYMBOL_MODEL_NAME = "symbol";
 const ADMIN_API = "https://cdn.builder.io/api/v2/admin";
 const writeApi = (model) => `https://builder.io/api/v1/write/${model}`;
 const writeUpdateApi = (model, id) =>
@@ -270,6 +272,11 @@ const ARTICLE_PREVIEW_URL_LOGIC = [
   "const baseUrl = space.siteUrl || 'http://localhost:3000';",
   "return `${baseUrl}/blogs/${content.data.handle || '_'}?preview=true`;",
 ].join("\n");
+
+// Symbols render at /section-editors/symbol via a static editor entry page
+// (there's no per-symbol route — the name is only used as a query hint).
+const SYMBOL_PREVIEW_URL_LOGIC =
+  "return `${space.siteUrl}/section-editors/symbol/${content.name || '_'}?preview=true`;";
 
 // --- metadata model definition (mirrors the Metadata type in @repo/types) ---
 // kind: "data" — a small reusable SEO block embedded via `model`-type fields.
@@ -1106,6 +1113,9 @@ async function main() {
   if (!createdArticle) {
     await ensurePreviewUrl(ARTICLE_MODEL_NAME, ARTICLE_PREVIEW_URL_LOGIC, models);
   }
+  // The built-in `symbol` model is never created by this script, so always
+  // update it directly (there's no "freshly created" branch to skip here).
+  await ensurePreviewUrl(SYMBOL_MODEL_NAME, SYMBOL_PREVIEW_URL_LOGIC, models);
 
   // The CDN takes a moment to register a brand-new model before it will
   // accept writes against it.
